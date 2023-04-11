@@ -54,6 +54,11 @@ public class Segment {
 		char[] s2 = seq.substring(bounds[1][0], bounds[1][1]).toCharArray();
 		boolean[] s2Found = new boolean[s2.length];
 		
+		for(int i=0; i<s1.length; i++) {
+			// s1[0] = stem (seq = 'S') 
+		}
+		
+		
 		/* hairpin index */
 		char lower = seq.charAt(bounds[0][1] + 1);
 		char upper = seq.charAt(bounds[1][0] - 1);
@@ -70,11 +75,17 @@ public class Segment {
 	
 	private Hairpin findHairpin(int[] hairpinBounds, List<Hairpin> hairpinList) {
 		
+		Hairpin h2 = hairpinList.get(0);
+		
 		for(Hairpin h : hairpinList) {
 			if(hairpinBounds[0] == h.bounds[0]) {
-				return h;
+				h2 = h;
+				break;
 			}
 		}
+		return h2;
 	}
+	
+	
 	 
 }
