@@ -20,13 +20,14 @@ public class FormatSequencesForRNAfold {
 
 		String genesInNetworkFile = "/Users/rnadeau2/Documents/Structures/hcm/MappingRefSeqIdsToGeneSymbol_corrNet2-400.tsv";
 		
-		String formatedSequencesFile = "/Users/rnadeau2/Documents/Structures/hcm/corrNet2-400_3utr_w100cds.fasta";
+		String formatedSequencesFile = "/Users/rnadeau2/Documents/Structures/hcm/fasta/corrNet2-400_3utr_w100cds_";
 
 		// load refSeqIds associated to proteins in network
 		HashSet<String> idSet = loadIds(genesInNetworkFile);
 
 		/* iterate over sequence IDs - get UTR and CDS sequence - format output for RNAfold */ 
 		int count = 0;
+		int fileCount = 0;
 		for(String id: idSet) {
 			
 			System.out.print(count + ".");
@@ -39,9 +40,13 @@ public class FormatSequencesForRNAfold {
 			String cds = getSequenceForGivenId(id, cdsSequencesFile);
 			
 			if(!utr.isEmpty() && !cds.isEmpty()) {
-				printFormattedSequence(formatedSequencesFile, id, utr, cds);
+				printFormattedSequence(formatedSequencesFile + fileCount + ".fasta", id, utr, cds);
 			}
 			count++;
+			
+			if(count%14 == 0) {
+				fileCount++; 
+			}
 		}
 
 	}
