@@ -12,37 +12,97 @@ public class determineSequenceStructure {
 
 	public static void main(String[] args) {
 
-		String sequenceFile = "";
+
+		String annotationFile = "";
+		String refSeqIdFile = "";
 		String motifsFile = "";
+		
+		String indexFile = "";
 
-		/* Read through significant motifs ; determine possible motif instances - map {Motif; Set<Instances>} */
+		String structureFile = "";
 
-		/* load sequence - annotated bpRNA file */ 
-
-
-		/* Identify position of motif
-		 * Identify what structures it's associated to
-		 * Determine if it's split structure */
-
-
-
-	}
-
-	private HashMap<String, HashSet<String>> loadMotifsOfInterest(String motifsFile){
-		HashMap<String, HashSet<String>> motifMap = new HashMap<>();
+		/* index sequence files - ID = file name */
+		HashMap<String, String> indexMap = getSequenceFilesByRefSeqId(indexFile);
+		
 		try {
 			BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(motifsFile))));
-			
-				/* load motif family */
-			
-			
-				/* determine set of possible motifs */
+
+			/* Read through significant motifs */
+
+			String line = in.readLine(); // header 
+			line = in.readLine();
+
+			while(line !=null) {
+
+				String motif = line.split("\t")[0];
+
+				/* Set motifs as regex and restrict search for core proteins */
+				Motif m = new Motif(motif, annotationFile, refSeqIdFile);
+
+				/* load sequences - annotated bpRNA file - ignore first 100 bp - search for motif */ 
+				for(String id: m.getRefSeqId().keySet()) {
+					
+					/* get the file name that contains RefSeqId corresponding sequence */
+					String file = indexMap.get(id);
+					
+					/* search file for sequence info */
+					
+				}
+
+				line = in.readLine();
+			}
 
 			in.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return motifMap;
+
 	}
 
+	private static HashMap<String, String> getSequenceFilesByRefSeqId(String indexFile){
+		
+		HashMap<String, String> indexMap = new HashMap<>();
+		
+		try {
+			BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(indexFile))));
+			
+			String line = in.readLine();
+			while(line!=null) {
+				
+				String[] entry = line.split("\t"); // [0] = File name, [1] = RefSeqId
+				indexMap.put(entry[1],	entry[0]);
+				
+				line = in.readLine();
+			}
+			
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return indexMap;
+	}
+	
+	private void searchStructureFilesForMotif(Motif m, String structureFile) {
+		
+		HashMap<String, String> indexMap = new HashMap<>();
+		
+		try {
+			BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(structureFile))));
+			
+			String line = in.readLine();
+			while(line!=null) {
+				
+				/* load sequence */
+				
+				/* load structure */
+			
+				line = in.readLine();
+			}
+			
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
 }
