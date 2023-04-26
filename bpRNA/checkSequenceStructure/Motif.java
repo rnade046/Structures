@@ -5,9 +5,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class Motif {
@@ -15,12 +17,14 @@ public class Motif {
 	private String motif; 
 	private Pattern regexMotif;
 	private HashMap<String, String> refSeqIdMap; // {ID = protein} 
+	private List<Occurrence> occurences;
 
 	public Motif(String m, String annotationFile, String refSeqIdFile) {
 
 		this.motif = m;
 		this.regexMotif = Pattern.compile(formatMotifWithRegularExpression(m));
 		this.refSeqIdMap = determineRefSeqIdsAssociatedToCoreProteinsAnnotatedByMotif(annotationFile, refSeqIdFile);
+		this.occurences = new ArrayList<>();
 	}
 
 	/* get functions */
@@ -36,6 +40,18 @@ public class Motif {
 		return this.refSeqIdMap;
 	}
 
+	public String getProtein(String id) {
+		return this.refSeqIdMap.get(id);
+	}
+	
+	public void updateOccurrences(List<Occurrence> oc) {
+		this.occurences.addAll(oc);
+	}
+	
+	public List<Occurrence> getOccurrences(){
+		return this.occurences;
+	}
+	
 	/**
 	 * Take input motif and translate to corresponding regular expression. 
 	 * 
@@ -71,11 +87,11 @@ public class Motif {
 		characterMap.put('A', "A");
 		characterMap.put('C', "C");
 		characterMap.put('G', "G");
-		characterMap.put('T', "T");
+		characterMap.put('T', "U");
 		characterMap.put('R', "[AG]");
-		characterMap.put('Y', "[CT]");
-		characterMap.put('D', "[ATG]");
-		characterMap.put('B', "[TGC]");
+		characterMap.put('Y', "[CU]");
+		characterMap.put('D', "[AUG]");
+		characterMap.put('B', "[UGC]");
 		characterMap.put('H', "[AUC]");
 		characterMap.put('V', "[AGC]");
 		characterMap.put('*', ".");
