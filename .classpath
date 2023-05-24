@@ -7,6 +7,7 @@
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="bpRNA"/>
+	<classpathentry kind="src" path="hcmEnrichmentOfStructureDominantMotifs"/>
 	<classpathentry kind="lib" path="/Users/rnadeau2/Documents/GitHub/Structures/json-20230227.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
