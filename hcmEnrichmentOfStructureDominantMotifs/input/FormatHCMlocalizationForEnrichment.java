@@ -28,6 +28,11 @@ public class FormatHCMlocalizationForEnrichment {
 
 		String outputFile = "/safeEnrichmentInput_motif";
 		String outputNMFFile = "/nmfEnrichmentInput_motif";
+		
+		String outputFile2 = "/safeEnrichmentInput_MotifBG_motif";
+		String outputNMFFile2 = "/nmfEnrichmentInput_MotifBG_motif";
+		
+		
 
 
 		/* get proteins in network SAFE domain */
@@ -42,9 +47,9 @@ public class FormatHCMlocalizationForEnrichment {
 		System.out.println("** get motif info **");
 
 		for(int m: motifs.values()) {
-			
+
 			File f = new File(wd + "structures/localizations/Motif" + m + "/"); 
- 
+
 			if (!f.exists()) { 
 				f.mkdirs();
 			} 
@@ -56,6 +61,9 @@ public class FormatHCMlocalizationForEnrichment {
 			System.out.println("** print motifs **");
 			printSafeDomains(f + outputFile, m, proteinList, structures.getStructures());
 			printNMFregions(f + outputNMFFile, m, proteinList, structures.getStructures());
+			
+			printSafeDomainsMotifOnly(f+ outputFile2, m, proteinList, structures.getStructures());
+			printNMFregionsMotifOnly(f + outputNMFFile2, m, proteinList, structures.getStructures());
 		}
 
 
@@ -189,6 +197,8 @@ public class FormatHCMlocalizationForEnrichment {
 				out.write("protein\tgroup\tSAFE\n");
 
 				for(Protein prot : proteinList) {
+
+
 					out.write(prot.getName() + "\t");
 
 					if(proteinsWithStructure.contains(prot.getName())) {
@@ -210,6 +220,50 @@ public class FormatHCMlocalizationForEnrichment {
 
 	}
 
+	private static void printSafeDomainsMotifOnly(String outputFile, int motif, List<Protein> proteinList, HashMap<Character, HashSet<String>> structures) {
+
+
+		HashSet<String> proteinSet = new HashSet<>();
+		for(HashSet<String> proteins: structures.values()) {
+			proteinSet.addAll(proteins);
+		}
+
+		for(Entry<Character, HashSet<String>> s: structures.entrySet()) {
+			char dStructure = s.getKey();
+			HashSet<String> proteinsWithStructure = s.getValue();
+
+			try {
+				BufferedWriter out = new BufferedWriter(new FileWriter(new File(outputFile + motif + "_" + dStructure + ".tsv")));
+
+				out.write("protein\tgroup\tSAFE\n");
+
+				for(Protein prot : proteinList) {
+
+					if(proteinSet.contains(prot.getName())) {
+
+						out.write(prot.getName() + "\t");
+
+						if(proteinsWithStructure.contains(prot.getName())) {
+							out.write("Motif\t");
+						}else {
+							out.write("NotMotif\t");
+						}
+
+						out.write(prot.getSafeDomain() + "\n");
+						out.flush();
+					}
+				}
+
+				out.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+		}
+
+	}
+
+
 	private static void printNMFregions(String outputFile, int motif, List<Protein> proteinList, HashMap<Character, HashSet<String>> structures) {
 
 		for(Entry<Character, HashSet<String>> s: structures.entrySet()) {
@@ -230,7 +284,7 @@ public class FormatHCMlocalizationForEnrichment {
 					}else {
 						out.write("NotMotif\t");
 					}
-					
+
 					out.write(prot.getNMFregion() + "\n");
 					out.flush();
 				}
@@ -243,4 +297,43 @@ public class FormatHCMlocalizationForEnrichment {
 
 	}
 
+	private static void printNMFregionsMotifOnly(String outputFile, int motif, List<Protein> proteinList, HashMap<Character, HashSet<String>> structures) {
+
+		HashSet<String> proteinSet = new HashSet<>();
+		for(HashSet<String> proteins: structures.values()) {
+			proteinSet.addAll(proteins);
+		}
+
+		for(Entry<Character, HashSet<String>> s: structures.entrySet()) {
+
+			char dStructure = s.getKey();
+			HashSet<String> proteinsWithStructure = s.getValue();
+
+			try {
+				BufferedWriter out = new BufferedWriter(new FileWriter(new File(outputFile + motif + "_" + dStructure +".tsv")));
+
+				out.write("protein\tgroup\tSAFE\n");
+
+				for(Protein prot : proteinList) {
+
+					if(proteinSet.contains(prot.getName())) {
+
+						out.write(prot.getName() + "\t");
+
+						if(proteinsWithStructure.contains(prot.getName())) {
+							out.write("Motif\t");
+						}else {
+							out.write("NotMotif\t");
+						}
+						out.write(prot.getNMFregion() + "\n");
+						out.flush();
+					}
+				}
+				out.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+	}
 }

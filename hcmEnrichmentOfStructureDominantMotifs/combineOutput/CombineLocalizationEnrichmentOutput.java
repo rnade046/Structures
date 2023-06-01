@@ -16,8 +16,8 @@ public class CombineLocalizationEnrichmentOutput {
 	public static void main(String[] args) {
 
 		String wd = "/Users/rnadeau2/Documents/LESMoNlocal/analysis/structures/localizations/";
-		String enrichmentFilePrefix = "nmfEnrichment_output_motif";
-		String ouptputEnrichmentInformation = "nmfEnrichment_combinedData_motif";
+		String enrichmentFilePrefix = "safeEnrichment_MotifBG_output_motif";
+		String ouptputEnrichmentInformation = "safe/safeEnrichment_MotifBG_combinedData_motif";
 
 		/* for each motif create a combined file - showing enrichment scores for significant domains (adjusted p-value < 0.05) */ 
 
@@ -36,7 +36,6 @@ public class CombineLocalizationEnrichmentOutput {
 					structures.put(s, loadStructureEnrichment(enrichmentFile, s));
 				}
 			}
-
 			/* print combined results */
 			printEnrichmentResults(wd + ouptputEnrichmentInformation + i + ".tsv", structures, dominantStructures);
 		}
@@ -79,8 +78,8 @@ public class CombineLocalizationEnrichmentOutput {
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(new File(outputFile)));
 
-			out.write("NMF\t");
-			for(int i=1; i<=20; i++) {
+			out.write("SAFE\t");
+			for(int i=1; i<=24; i++) {
 				out.write(i + "\t");
 			}
 			out.write("\n");

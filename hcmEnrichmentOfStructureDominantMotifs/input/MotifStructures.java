@@ -5,7 +5,8 @@ import java.util.HashSet;
 
 public class MotifStructures {
 
-	private HashMap<Character, HashSet<String>> structures;
+	// STRUCTURE = List<PROTEIN> 
+	private HashMap<Character, HashSet<String>> structures; 
 	
 	public MotifStructures() {
 		
