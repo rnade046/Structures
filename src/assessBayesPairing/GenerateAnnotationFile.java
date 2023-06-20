@@ -8,37 +8,32 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.json.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-public class assessBayesPairingOutput {
+public class GenerateAnnotationFile {
 
 	public static void main(String[] args) {
+
+		/* load protein list, but only modules with score that passes our set threshold */
 
 		String wd = args[0];
 
 		String jsonIdxFile = "jsonIdxOfRefSeqIds.tsv";
 		String refSeqIdFile = "corrNetTop2-400_proteinsInNetwork_info.tsv";
 
-		String outputFile = "ModuleScoreSummary.tsv";
-		String moduleInfoFile = "protein-module-structure-info.tsv";
-		
+		double threshold = 4.0;
 
 		/* determine mapping of protein - refSeqIds - .JSON files */ 
 		List<Protein> proteinList = determineProteinMapping(refSeqIdFile, jsonIdxFile);
 
-		/* search for modules
-		 * 
-		 *  TO ADD : check if there's a protein without module-structure information ; maybe make a seperate function to check this
-		 *  */
-		
 		System.out.println("searching modules");
-		int fileNotFound = 0; 
 		for(Protein prot: proteinList) {
 			System.out.println(prot);
 
@@ -49,26 +44,17 @@ public class assessBayesPairingOutput {
 
 				File f = new File(jsonFile);
 				if(f.exists()) {
-					prot.updateMultipleModules(loadJson(jsonFile, prot.getFileIdMap().get(jsonFileSuffix)));
+					prot.updateMultipleModules(loadJson(jsonFile, prot.getFileIdMap().get(jsonFileSuffix), threshold));
 
 				} else {
 					System.out.println(prot.getFileIdMap().get(jsonFileSuffix) + " - file not found");
 					prot.addMissedId(prot.getFileIdMap().get(jsonFileSuffix) ); // add missed ID to list
-					fileNotFound++;
 				}
 			}
-			prot.summarizeModules();
 		}
-		System.out.println("** File not found : " + fileNotFound + " **");
 
-		List<List<Double>> moduleSummary = combineModuleCounts(proteinList);
+		/* create annotation file */
 
-		System.out.println("** print module summary **");
-		System.out.println("modules : " + moduleSummary.size());
-		printCombinedResults(outputFile, moduleSummary);
-		
-		System.out.println("** protein info summary **");
-		assessModuleStructureInfo(proteinList, moduleInfoFile);
 	}
 
 	public static List<Protein> determineProteinMapping(String refSeqToProteinFile, String refSeqToJSONFile) {
@@ -83,13 +69,13 @@ public class assessBayesPairingOutput {
 
 		System.out.println("Creating protein list:");
 		for(Entry<String, String[]> entry: refSeqIdMap.entrySet()) {
-			
+
 			System.out.print(proteinList.size() + ".");
-			
+
 			if(proteinList.size()%50 == 0) {
 				System.out.println();
 			}
-			
+
 			Protein p = new Protein(entry.getKey());
 			for(String id: entry.getValue()) {
 				p.updateJSONmapping(id, jsonIdxMap.get(id));
@@ -135,7 +121,6 @@ public class assessBayesPairingOutput {
 
 				line = in.readLine();
 			}
-
 			in.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -143,82 +128,7 @@ public class assessBayesPairingOutput {
 		return jsonIdxMap;
 	}
 
-	public static List<List<Double>> combineModuleCounts(List<Protein> proteinList) {
-
-		List<List<Double>> modules = new ArrayList<>(); 
-		for(int i=0; i<=270; i++) { // 0-270 modules
-			modules.add(new ArrayList<Double>());
-		}
-
-		for(Protein prot : proteinList) {
-			
-			for(Entry<Integer, Double> entry: prot.getModuleSummaryMap().entrySet()) {
-				//System.out.println("module = " + entry.getKey());
-				//System.out.println("value = " + entry.getValue());
-				modules.get(entry.getKey()).add(entry.getValue()); // key = module, value = score
-			}
-		}
-		return modules;
-	}
-
-	/* load map of JSON files to refSeqIds */
-	public static void printCombinedResults(String outputFile, List<List<Double>> modules) {
-
-		try {
-			BufferedWriter out = new BufferedWriter(new FileWriter(new File(outputFile)));
-
-			out.write("Module\tS>0\tS>0.5\tS>1\tS>1.5\tS>2\tS>2.5\tS>3\tS>3.5\tS>4\n");
-			
-			for(int i=0; i<modules.size(); i++) {
-				List<Double> moduleScores = modules.get(i);
-				
-				int[] count = new int[9]; 	// 0-4, interval of 0.5
-				// [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4]
-				
-				for(double score: moduleScores) {
-					
-					int index = 0;
-
-					if(score > 4) {
-						index = 8; 
-					} else if(score > 3.5) {
-						index = 7;
-					} else if(score > 3) {
-						index = 6;
-					} else if(score > 2.5) {
-						index = 5;
-					} else if(score > 2) {
-						index = 4;
-					} else if(score > 1.5) {
-						index = 3;
-					} else if(score > 1) {
-						index = 2;
-					} else if(score > 0.5) {
-						index = 1;
-					}
-
-					for(int j=0; j<=index; j++) {
-						count[j] += 1;
-					}
-				}
-
-				out.write(i +"\t");
-
-				for(int j=0; j<count.length; j++) {
-					out.write(count[j] +"\t");
-				}
-
-				out.write("\n");
-				out.flush();
-			}
-			out.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	public static List<Module> loadJson(String inputFile, String id) {
+	public static List<Module> loadJson(String inputFile, String id, double threshold) {
 
 		List<Module> modules = new ArrayList<>();
 
@@ -228,7 +138,7 @@ public class assessBayesPairingOutput {
 			String line = in.readLine();
 
 			JSONObject rootObject = new JSONObject(line); // Parse the JSON to a JSONObject
-			
+
 			JSONObject a = rootObject.getJSONObject("all_hits").getJSONObject(id); // {270}
 
 			Iterator<String> keys = a.keys();
@@ -239,7 +149,7 @@ public class assessBayesPairingOutput {
 				String k = keys.next();
 				JSONArray m = a.getJSONArray(k); 
 
-				//System.out.println("k = " + k + " ; ");
+				System.out.println("k = " + k + " ; ");
 
 				for(int i=0; i < m.length(); i++) {
 
@@ -247,16 +157,15 @@ public class assessBayesPairingOutput {
 					JSONArray elements = m.getJSONArray(i);
 					String seq = elements.get(0).toString();
 					String[] pos = elements.get(1).toString().split("[,\\[\\]]");
-					String[] pos2 = Arrays.copyOfRange(pos, 2, pos.length);
 					double score = Double.parseDouble(elements.get(2).toString());
-					
-					if(score > 0) { // positive score
-						if(!pos2[0].isEmpty()) {
-							if(Integer.parseInt(pos2[0]) > 100) { // ignore models in the CDS
-								modules.add(new Module(Integer.parseInt(k), seq, score, pos2));
+
+					if(score > threshold) { // positive score
+						if(!pos[0].isEmpty()) {
+							if(Integer.parseInt(pos[0]) > 100) { // ignore models in the CDS
+								modules.add(new Module(Integer.parseInt(k), seq, score, pos));
 							}	
 						}
-						
+
 					}
 					System.out.print(i + " ");
 				}
@@ -265,43 +174,25 @@ public class assessBayesPairingOutput {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		System.out.println("modules: " + modules.size());
 		return modules;
 	}
 
-	public static void assessModuleCount(List<Module> modules, String outputFile) {
+	public static void generateAnnotationFile(List<Protein> proteinList, String outputFile) {
 
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(new File(outputFile)));
 
-			for(Module m : modules) {
-				out.write(m.getID() + "\t" + m.getSequence() + "\t" + m.getScore() + "\n");
-				out.flush();
-			}
+			out.write("Module\t#Prot\tProteinList\n");
 
-			out.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+			for(int i=0; i<196; i++) {
 
-	}
+				HashSet<String> protSet = new HashSet<>();
 
-	public static void assessModuleStructureInfo(List<Protein> protList, String outputFile) {
-
-		try {
-			BufferedWriter out = new BufferedWriter(new FileWriter(new File(outputFile)));
-
-			out.write("Protein\t#RefSeqIDs\t#MissedIds\tListMissedIds\n");
-
-			for(Protein p: protList) {
-				out.write(p.getProteinName() + "\t" + p.getFileIdMap().size() + "\t" + p.getMissedIDs().size() + "\t");
-
-				for(String id: p.getMissedIDs()) {
-					out.write(id + "|");
+				for(Protein p : proteinList) {
+					
 				}
-				out.write("\n");
-				out.flush();
+
+
 			}
 
 			out.close();
@@ -309,6 +200,6 @@ public class assessBayesPairingOutput {
 			e.printStackTrace();
 		}
 
-	}
 
+	}
 }

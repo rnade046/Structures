@@ -2,12 +2,14 @@ package assessBayesPairing;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class Protein {
 
 	private String name;
 	private HashMap<String, String> jsonFileIdxMap; // fileID = refSeqId;
+	private HashSet<String> missedIDs;
 	private List<Module> moduleList;
 	private HashMap<Integer, Double> moduleSummaryMap; // id = max score obtained
 
@@ -15,6 +17,7 @@ public class Protein {
 		this.name = n;
 		this.jsonFileIdxMap = new HashMap<>();
 		this.moduleList = new ArrayList<>();
+		this.missedIDs = new HashSet<>();
 	}
 	
 	public String getProteinName() {
@@ -28,6 +31,10 @@ public class Protein {
 	public List<Module> getModuleList(){
 		return this.moduleList;
 	}
+	
+	public HashSet<String> getMissedIDs(){
+		return this.missedIDs;
+	}
 
 	public void updateJSONmapping(String id, String fileName) {
 		this.jsonFileIdxMap.put(fileName, id);
@@ -39,6 +46,10 @@ public class Protein {
 	
 	public void updateMultipleModules(List<Module> m) {
 		this.moduleList.addAll(m);
+	}
+	
+	public void addMissedId(String id) {
+		this.missedIDs.add(id);
 	}
 
 	public void summarizeModules() {
