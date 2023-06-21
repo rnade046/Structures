@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,11 +25,12 @@ public class GenerateAnnotationFile {
 		/* load protein list, but only modules with score that passes our set threshold */
 
 		String wd = args[0];
+		
+		double threshold = 4.0;
 
 		String jsonIdxFile = "jsonIdxOfRefSeqIds.tsv";
 		String refSeqIdFile = "corrNetTop2-400_proteinsInNetwork_info.tsv";
-
-		double threshold = 4.0;
+		String annotationFile = "corrNetTop2-400_structureModules_" + threshold + ".tsv";
 
 		/* determine mapping of protein - refSeqIds - .JSON files */ 
 		List<Protein> proteinList = determineProteinMapping(refSeqIdFile, jsonIdxFile);
@@ -51,9 +53,11 @@ public class GenerateAnnotationFile {
 					prot.addMissedId(prot.getFileIdMap().get(jsonFileSuffix) ); // add missed ID to list
 				}
 			}
+			prot.summarizeModules();
 		}
 
 		/* create annotation file */
+		generateAnnotationFile(proteinList, annotationFile);
 
 	}
 
@@ -149,23 +153,21 @@ public class GenerateAnnotationFile {
 				String k = keys.next();
 				JSONArray m = a.getJSONArray(k); 
 
-				System.out.println("k = " + k + " ; ");
-
 				for(int i=0; i < m.length(); i++) {
 
 					/* each instance of a module */
 					JSONArray elements = m.getJSONArray(i);
 					String seq = elements.get(0).toString();
 					String[] pos = elements.get(1).toString().split("[,\\[\\]]");
+					String[] pos2 = Arrays.copyOfRange(pos, 2, pos.length);
 					double score = Double.parseDouble(elements.get(2).toString());
 
 					if(score > threshold) { // positive score
-						if(!pos[0].isEmpty()) {
-							if(Integer.parseInt(pos[0]) > 100) { // ignore models in the CDS
-								modules.add(new Module(Integer.parseInt(k), seq, score, pos));
+						if(!pos2[0].isEmpty()) {
+							if(Integer.parseInt(pos2[0]) > 100) { // ignore models in the CDS
+								modules.add(new Module(Integer.parseInt(k), seq, score, pos2));
 							}	
 						}
-
 					}
 					System.out.print(i + " ");
 				}
@@ -184,15 +186,22 @@ public class GenerateAnnotationFile {
 
 			out.write("Module\t#Prot\tProteinList\n");
 
-			for(int i=0; i<196; i++) {
+			for(int i=0; i<=270; i++) {
 
 				HashSet<String> protSet = new HashSet<>();
 
 				for(Protein p : proteinList) {
-					
+					if(p.getModuleSummaryMap().containsKey(i)) {
+						protSet.add(p.getProteinName());
+					}
 				}
-
-
+				
+				out.write(i + "\t" + protSet.size() + "\t");
+				for(String prot: protSet) {
+					out.write(prot + "|");
+				}
+				out.write("\n");
+				out.flush();
 			}
 
 			out.close();
