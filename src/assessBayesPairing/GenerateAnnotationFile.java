@@ -26,7 +26,7 @@ public class GenerateAnnotationFile {
 
 		String wd = args[0];
 		
-		double threshold = 4.0;
+		double threshold = Double.parseDouble(args[1]);
 
 		String jsonIdxFile = "jsonIdxOfRefSeqIds.tsv";
 		String refSeqIdFile = "corrNetTop2-400_proteinsInNetwork_info.tsv";
