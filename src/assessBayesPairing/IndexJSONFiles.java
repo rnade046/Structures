@@ -12,12 +12,16 @@ public class IndexJSONFiles {
 
 	public static void main(String[] args) {
 		
-		String outputFile = "jsonIdxOfRefSeqIds.tsv";
+		String inputPrefix = args[0]; // "struct/corrNet2-400_3utr_w100cds_formattedStructure_"
+		String outputFile = args[1];
+		int start = Integer.parseInt(args[2]);
+		int end = Integer.parseInt(args[3]);
+
 		
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(new File(outputFile)));
 			
-			for(int i=0; i<=974; i++) {
+			for(int i=start; i<=end; i++) {
 				
 				if(i%50 == 0) {
 					System.out.println();
@@ -25,7 +29,7 @@ public class IndexJSONFiles {
 				System.out.print(i + "|");
 				
 				/* read .txt file */
-				String inputFile = "struct/corrNet2-400_3utr_w100cds_formattedStructure_"+ i+".txt";
+				String inputFile = inputPrefix + i+".txt";
 				
 				BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(inputFile))));
 				
