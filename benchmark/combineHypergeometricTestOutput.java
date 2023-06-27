@@ -12,8 +12,8 @@ public class combineHypergeometricTestOutput {
 
 	public static void main(String[] args) {
 
-		String inputPrefix = "/Users/rnadeau2/Documents/Structures/benchmark/module/moduleInfo_output_clustSize3_module";
-		String combinedDataFile = "/Users/rnadeau2/Documents/Structures/benchmark/corrNet2-400_benchmark_structures_score4_clustSize3.tsv";
+		String inputPrefix = "/Users/rnadeau2/Documents/Structures/benchmark/module-0/moduleInfo_output_clustSize3_module";
+		String combinedDataFile = "/Users/rnadeau2/Documents/Structures/benchmark/corrNet2-400_benchmark_structures_score0_clustSize3.tsv";
 
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(new File(combinedDataFile)));

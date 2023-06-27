@@ -14,9 +14,9 @@ public class FormatDataForHypergeometricTest {
 
 	public static void main(String[] args) {
 
-		String annotationFile = "/Users/rnadeau2/Documents/Structures/benchmark/corrNetTop2-400_structureModules_4.0.tsv";
+		String annotationFile = "/Users/rnadeau2/Documents/Structures/benchmark/corrNetTop2-400_structureModules_0.0.tsv";
 		String mclFile = "/Users/rnadeau2/Documents/Structures/benchmark/mclOutput_i2.txt";
-		String outputPrefix = "/Users/rnadeau2/Documents/Structures/benchmark/module/moduleInfo_";
+		String outputPrefix = "/Users/rnadeau2/Documents/Structures/benchmark/module-0/moduleInfo_";
 		
 		formatHypergeometricInput(mclFile, annotationFile, outputPrefix);
 	}
