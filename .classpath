@@ -5,7 +5,7 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="annotation"/>
 	<classpathentry kind="src" path="bpRNA"/>
 	<classpathentry kind="src" path="hcmEnrichmentOfStructureDominantMotifs"/>
 	<classpathentry kind="src" path="benchmark"/>
