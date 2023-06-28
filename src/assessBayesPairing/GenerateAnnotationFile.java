@@ -27,41 +27,41 @@ public class GenerateAnnotationFile {
 		String wd = args[0];
 		
 		double threshold = Double.parseDouble(args[1]);
-
-		String jsonIdxFile = "jsonIdxOfRefSeqIds.tsv";
+		String condition = args[2];
+		
+		String jsonIdxFile = "jsonIdxOfRefSeqIds_" + condition + ".tsv";
 		String refSeqIdFile = "corrNetTop2-400_proteinsInNetwork_info.tsv";
-		String annotationFile = "corrNetTop2-400_structureModules_" + threshold + ".tsv";
+		String annotationFile = "corrNetTop2-400_structureModules_" + condition + "_" + threshold + ".tsv";
 
 		/* determine mapping of protein - refSeqIds - .JSON files */ 
-		List<Protein> proteinList = determineProteinMapping(refSeqIdFile, jsonIdxFile);
+		List<Protein> proteinList = determineProteinMapping(refSeqIdFile, jsonIdxFile, condition);
 
 		System.out.println("searching modules");
 		for(Protein prot: proteinList) {
 			System.out.println(prot);
 
-			for(String jsonFileSuffix :prot.getFileIdMap().keySet()) {
+			for(String jsonFileSuffix : prot.getFileIdMap().keySet()) {
 
-				System.out.println(prot.getFileIdMap().get(jsonFileSuffix) + " - checked");
+				String refSeq = prot.getFileIdMap().get(jsonFileSuffix);
 				String jsonFile = wd + jsonFileSuffix;
-
+				System.out.println("file: " + jsonFile);
 				File f = new File(jsonFile);
 				if(f.exists()) {
-					prot.updateMultipleModules(loadJson(jsonFile, prot.getFileIdMap().get(jsonFileSuffix), threshold));
-
+					System.out.println(refSeq + " - checked");
+					prot.updateMultipleModules(loadJson(jsonFile, refSeq, threshold));
 				} else {
-					System.out.println(prot.getFileIdMap().get(jsonFileSuffix) + " - file not found");
-					prot.addMissedId(prot.getFileIdMap().get(jsonFileSuffix) ); // add missed ID to list
+					System.out.println(refSeq + " - file not found");
+					prot.addMissedId(refSeq); // add missed ID to list
 				}
 			}
 			prot.summarizeModules();
 		}
-
 		/* create annotation file */
 		generateAnnotationFile(proteinList, annotationFile);
 
 	}
 
-	public static List<Protein> determineProteinMapping(String refSeqToProteinFile, String refSeqToJSONFile) {
+	public static List<Protein> determineProteinMapping(String refSeqToProteinFile, String refSeqToJSONFile, String condition) {
 
 		List<Protein> proteinList = new ArrayList<>();
 
@@ -81,10 +81,17 @@ public class GenerateAnnotationFile {
 			}
 
 			Protein p = new Protein(entry.getKey());
-			for(String id: entry.getValue()) {
-				p.updateJSONmapping(id, jsonIdxMap.get(id));
+			
+			/* search refSeqIds */ 
+			if(condition.equals("rand")) {
+				for(String id: entry.getValue()) {
+					p.updateJSONmapping(id + "_Shuffled", jsonIdxMap.get(id + "_Shuffled"));
+				}
+			} else { 
+				for(String id: entry.getValue()) {
+					p.updateJSONmapping(id, jsonIdxMap.get(id));
+				}
 			}
-
 			proteinList.add(p);
 		}
 		return proteinList;
@@ -121,8 +128,9 @@ public class GenerateAnnotationFile {
 			String line = in.readLine();
 			while(line!=null) {
 				String[] col = line.split("\t");
+				
 				jsonIdxMap.put(col[0], col[1]);
-
+			
 				line = in.readLine();
 			}
 			in.close();
