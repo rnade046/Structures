@@ -15,7 +15,7 @@ import graph.Protein;
 
 public class DistanceMatrix {
 
-	public static void computeDistanceMatrix(ArrayList<Interaction> interactionList, ArrayList<Protein> proteinList, String outputFile) {
+	public static double[][] computeDistanceMatrix(ArrayList<Interaction> interactionList, ArrayList<Protein> proteinList, String outputFile) {
 		/* Compute distance matrix using the list of proteins in the network and the list of known interactions in the network.
 		 * This distance matrix assumes a distance of 1 if proteins interact. Outputs file : ./IO_files/DistanceMatrix.txt */
 		/* Generate a weighted distance matrix based on the fold change of proteins in the network  */
@@ -54,7 +54,7 @@ public class DistanceMatrix {
 			}
 		}
 		
-		/* Implement the floyd-warshall algorithm */
+		/* Implement the Floyd-Warshall algorithm */
 		for (int k = 0; k < distance_matrix.length; k++) {
 			
 			if(k%100 == 0) {
@@ -87,10 +87,10 @@ public class DistanceMatrix {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+		return distance_matrix;
 	}
 	
-	public static void updateDistanceMatrix(boolean[] proteinsToKeep, double[][] distance_matrix, String filePath) {
+	public static double[][] updateDistanceMatrix(boolean[] proteinsToKeep, double[][] distance_matrix, String filePath) {
 
 		int protCount = 0;
 
@@ -142,6 +142,7 @@ public class DistanceMatrix {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}	
+		return updatedDistanceMatrix;
 	}
 	
 	public static double[][] loadDistanceMatrix(String distance_matrixFile, ArrayList<Protein> ProteinList) {

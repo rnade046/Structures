@@ -1,10 +1,14 @@
 package network;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -98,7 +102,7 @@ public class NetworkProteins {
 				out.write(prot.getProteinName() + "\t");
 
 				if(prot.getProteinId() != null) {
-					for(String id: prot.getProteinId()) {
+					for(String id: prot.getProteinId()) { // refSeqIds 
 						out.write(id + "|");
 					}
 				}
@@ -110,8 +114,27 @@ public class NetworkProteins {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
 
+	public static ArrayList<Protein> loadProteinsInNetwork(String proteinInfoFile){
+		
+		ArrayList<Protein> proteinList = new ArrayList<>();
+		try {		
+			BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(proteinInfoFile))));
 
+			String line = in.readLine();
+			while(line != null) {
+				
+				String[] col = line.split("\t");
+				proteinList.add(new Protein(col[0], Arrays.asList(col[0].split("\\|"))));
+				
+				line = in.readLine();
+			}
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return proteinList;
 	}
 
 	/**
@@ -131,7 +154,7 @@ public class NetworkProteins {
 
 		return proteinsIdxInNetworkMap;
 	}
-	
+
 	public static HashSet<String> getProteinSet(ArrayList<Protein> proteinList){
 
 		HashSet<String> proteinSet = new HashSet<>();
