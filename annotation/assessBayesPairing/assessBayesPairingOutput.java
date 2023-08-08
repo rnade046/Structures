@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +27,7 @@ public class assessBayesPairingOutput {
 		String refSeqIdFile = "corrNetTop2-400_proteinsInNetwork_info.tsv";
 
 		String outputFile = "ModuleScoreSummary.tsv";
+		String moduleRangeFile = "module-range-info.tsv";
 		String moduleInfoFile = "protein-module-structure-info.tsv";
 		
 
@@ -69,6 +71,9 @@ public class assessBayesPairingOutput {
 		
 		System.out.println("** protein info summary **");
 		assessModuleStructureInfo(proteinList, moduleInfoFile);
+		
+		System.out.println("** print module range info **");
+		printModuleRange(moduleRangeFile, moduleSummary, proteinList);
 	}
 
 	public static List<Protein> determineProteinMapping(String refSeqToProteinFile, String refSeqToJSONFile) {
@@ -286,6 +291,37 @@ public class assessBayesPairingOutput {
 		}
 
 	}
+	
+	public static void printModuleRange(String outputFile, List<List<Double>> modules, List<Protein> protList) {
+		
+		try {
+			BufferedWriter out = new BufferedWriter(new FileWriter(new File(outputFile)));
+			
+			out.write("Module\tMinScore\tMaxScore\n");
+			for(int i=0; i<modules.size(); i++) {
+				
+				List<Double> mScores = modules.get(i);
+				if(mScores.size() > 0) {
+					out.write(i + "\t" + Collections.min(mScores) + "\t" + Collections.max(mScores) + "\n");
+				}
+				out.flush();
+			}
+			
+			out.write("\n\n\n\n");
+			out.write("Protein\tMinScore\tMaxScore\n");
+			
+			for(Protein p : protList) {
+				/* get scores */
+				ArrayList<Double> scores = new ArrayList<>(p.getModuleSummaryMap().values());
+				out.write(p.getProteinName() + "\t" + Collections.min(scores) + "\t" + Collections.max(scores) + "\n");
+				out.flush();
+			}
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 
 	public static void assessModuleStructureInfo(List<Protein> protList, String outputFile) {
 
