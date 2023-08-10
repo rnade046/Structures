@@ -269,7 +269,7 @@ public class ClusteringMeasure {
 		
 		return tppd;
 	}
-
+	
 	@SuppressWarnings("unused")
 	private static ArrayList<Double> getTopPathsWithBinarySearch(ArrayList<Integer> coreIdxs, ArrayList<Integer> allIdxs, double[][] distanceMatrix, double threshold){
 		ArrayList<Double> sortedPaths = new ArrayList<>();

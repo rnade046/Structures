@@ -46,6 +46,8 @@ public class Main {
 		String annotationOutputFile = wd + networkType + "_structure_clusteringDetails.tsv";
 		String significanceScoreFile = wd + networkType + "_structure_significantScores.tsv";
 
+		int clusteringMeasure = 3;
+		
 		/* Load interaction network - from ABC format */ 
 		System.out.println("** Loading interaction repository **");
 		ArrayList<Interaction> interactionList = CorrelationGraphLoader.loadGraphFromCorrelationNetwork(networkFile, proteinMappingFile);
@@ -118,6 +120,7 @@ public class Main {
 		
 		/* Perform Monte Carlo Sampling procedure */
 		if(Boolean.parseBoolean(params.getProperty("performMCprocedure"))) {
+			
 			System.out.println("**Performing Monte Carlo Sampling Procedure**");
 			MotifSampling sampling = new MotifSampling(proteinAnnotationFrequencyFile, proteinList2, distanceMatrix, 0, 0); // 2 - Initialize sampling
 			sampling.computeMultipleDistributions(Integer.parseInt(args[1]), Integer.parseInt(args[2]), numOfSamplings, mcSamplingPrefix, annotationCompanionFile); // 3 - Perform sampling for n proteins

@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -196,17 +195,17 @@ public class GenerateAnnotationFile {
 
 			for(int i=0; i<=270; i++) {
 
-				HashSet<String> protSet = new HashSet<>();
+				HashMap<String, Double> protMap = new HashMap<>();
 
 				for(Protein p : proteinList) {
 					if(p.getModuleSummaryMap().containsKey(i)) {
-						protSet.add(p.getProteinName());
+						protMap.put(p.getProteinName(), p.getModuleSummaryMap().get(i));
 					}
 				}
 				
-				out.write(i + "\t" + protSet.size() + "\t");
-				for(String prot: protSet) {
-					out.write(prot + "|");
+				out.write(i + "\t" + protMap.size() + "\t");
+				for(Entry<String, Double> e: protMap.entrySet()) {
+					out.write(e.getKey() + "_" + e.getValue() + "|");
 				}
 				out.write("\n");
 				out.flush();

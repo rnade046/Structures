@@ -47,7 +47,7 @@ public class AnnotationCompanionFile {
 					/* Count proteins in network */
 
 					for(String protein: proteins) {
-						if(proteinSet.contains(protein)) {
+						if(proteinSet.contains(protein.split("\\_")[0])) {
 							protCount++;
 						}
 					}

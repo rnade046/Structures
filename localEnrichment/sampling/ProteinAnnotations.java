@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 public class ProteinAnnotations {
 
@@ -36,6 +37,7 @@ public class ProteinAnnotations {
 		HashSet<String> motifsToTest = loadMotifsToTest(annotationCompanionFile);
 
 		HashMap<String, Integer> proteinToFrequencyMap = new HashMap<>();
+		HashMap<String, List<Double>> proteinToScoreMap = new HashMap<>();
 		try {
 			BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(annotationFile))));
 
@@ -45,16 +47,32 @@ public class ProteinAnnotations {
 
 				if(motifsToTest.contains(line.split("\\t")[0])) {
 
-					String[] protein_ids = line.split("\\t")[2].split("\\|"); // idx[2] = protein (name) list 
+					String[] protein_ids = line.split("\\t")[2].split("\\|"); // idx[2] = protein (name) list + scores
+
 					ArrayList<String> proteinList = checkProteinsInNetwork(protein_ids);
 
 					if(proteinList.size() >= lowerBoundToSample && proteinList.size() <= upperBoundToSample) {
+
 						/* For all proteins of a given annotation; if in list update number of occurrence, otherwise initialize */
 						for(int i=0; i<proteinList.size(); i++) {
 							if(proteinToFrequencyMap.containsKey(proteinList.get(i))) {
 								proteinToFrequencyMap.replace(proteinList.get(i), proteinToFrequencyMap.get(proteinList.get(i)) + 1);
 							} else {
 								proteinToFrequencyMap.put(proteinList.get(i), 1);
+							}
+						}
+
+						/* store scores */
+						for(String protEntry : protein_ids) {
+
+							String prot = protEntry.split("\\_")[0];
+							Double score = Double.parseDouble(protEntry.split("\\_")[1]);
+							if(proteinList.contains(prot)) {
+
+								if(!proteinToScoreMap.containsKey(prot)) {
+									proteinToScoreMap.put(prot, new ArrayList<Double>());
+								}
+								proteinToScoreMap.get(prot).add(score);
 							}
 						}
 					}
@@ -65,7 +83,7 @@ public class ProteinAnnotations {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		printProteinsToOccurence(outputFile, proteinToFrequencyMap);
+		printProteinsToOccurence(outputFile, proteinToFrequencyMap, proteinToScoreMap);
 	}
 
 	private HashSet<String> loadMotifsToTest(String annotationCompanionFile){
@@ -95,12 +113,17 @@ public class ProteinAnnotations {
 	 * @param outputFile				text file to contain Protein : Occurrence
 	 * @param proteinToOccurrenceMap	map of {protein: occurrence}
 	 */
-	private static void printProteinsToOccurence(String outputFile, HashMap<String, Integer> proteinToOccurrenceMap) {
+	private static void printProteinsToOccurence(String outputFile, HashMap<String, Integer> proteinToOccurrenceMap, HashMap<String, List<Double>> proteinToScoreMap) {
 		try {
 			OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(new File(outputFile)));
 			/* iterate through map */
 			for(String protein: proteinToOccurrenceMap.keySet()) {
-				out.write(protein + "\t" + proteinToOccurrenceMap.get(protein) + "\n");
+				out.write(protein + "\t" + proteinToOccurrenceMap.get(protein) + "\t");
+				
+				for(Double score: proteinToScoreMap.get(protein)) {
+					out.write(score + "|");
+				}
+				out.write("\n");
 				out.flush();
 			}
 			out.close();
@@ -115,15 +138,19 @@ public class ProteinAnnotations {
 		ArrayList<String> finalProteinList = new ArrayList<>();
 
 		for(String prot: proteinList) {
-			if(this.proteinSet.contains(prot)) {
-				finalProteinList.add(prot);
+
+			String formattedProt = prot.split("\\_")[0];
+
+			if(this.proteinSet.contains(formattedProt)) {
+				finalProteinList.add(formattedProt);
 			}
 		}
 
 		return finalProteinList;
 	}
 
-	public void combineProteinFrequencyData(String protFreqFilePrefix, int numFiles, String outputFile) {
+	@SuppressWarnings("unused")
+	private void combineProteinFrequencyData(String protFreqFilePrefix, int numFiles, String outputFile) {
 
 		HashMap<String, Integer> proteinToOccurrenceMap = new HashMap<>();
 
@@ -153,7 +180,7 @@ public class ProteinAnnotations {
 				e.printStackTrace();
 			}
 
-			printProteinsToOccurence(outputFile, proteinToOccurrenceMap);
+			//printProteinsToOccurence(outputFile, proteinToOccurrenceMap);
 		}
 	}
 

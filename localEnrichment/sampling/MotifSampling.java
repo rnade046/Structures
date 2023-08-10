@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import graph.Protein;
@@ -28,22 +29,27 @@ public class MotifSampling {
 	long[] cumulativeSumOfWeights;						// array containing the cumulative sum of weights for random weighted selection
 	long maxCumulativeWeight;
 	HashSet<Integer> protsNotToSample;
+	HashMap<String, List<Double>> proteinScoreMap;
 
 	int clusteringMeasure;
 	double percentThreshold;
 
-	public MotifSampling(String inputFile, ArrayList<Protein> protList, double[][] dm, int clustering_measure, double percent_threshold) {
+	public MotifSampling(String proteinAnnotationFreqFile, ArrayList<Protein> protList, double[][] dm, int clustering_measure, double percent_threshold) {
 		distanceMatrix = dm;
 		proteinsInNetworkList = protList;
 
 		clusteringMeasure = clustering_measure;
 		percentThreshold = percent_threshold;
 
-		proteinToOccurrenceMap = loadProteinOccurrenceList(inputFile);
+		proteinToOccurrenceMap = loadProteinOccurrenceList(proteinAnnotationFreqFile);
 		cumulativeSumOfWeights = computeCumulativeSumOfWeights();
 
 		maxCumulativeWeight = cumulativeSumOfWeights[cumulativeSumOfWeights.length-1];
 		protsNotToSample = listProteinsNotToSample();
+
+		if(clustering_measure == 3) {
+			proteinScoreMap = getProteinScores(proteinAnnotationFreqFile);
+		}
 	}
 
 	/** 
@@ -306,5 +312,31 @@ public class MotifSampling {
 		return randomProteinsIdxList;
 	}
 
+
+	private HashMap<String, List<Double>> getProteinScores(String annotationFile){
+
+		HashMap<String, List<Double>> allProtScoreMap = new HashMap<>();
+
+		try {
+			BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(annotationFile))));
+			String line = in.readLine();
+			while(line !=null) {
+				String[] value = line.split("\t");
+				String[] scores = value[1].split("\\_");
+				List<Double> scores2 = new ArrayList<>();
+				
+				for(String s: scores) {
+					scores2.add(Double.parseDouble(s));
+				}
+				allProtScoreMap.put(value[0], scores2);
+				line = in.readLine();
+			}
+			
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return allProtScoreMap;
+	}
 }
 
