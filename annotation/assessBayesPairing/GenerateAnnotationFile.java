@@ -83,7 +83,7 @@ public class GenerateAnnotationFile {
 			Protein p = new Protein(entry.getKey());
 			
 			/* search refSeqIds */ 
-			if(condition.equals("rand")) {
+			if(condition.startsWith("rand")) {
 				for(String id: entry.getValue()) {
 					p.updateJSONmapping(id + "_Shuffled", jsonIdxMap.get(id + "_Shuffled"));
 				}

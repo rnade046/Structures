@@ -29,7 +29,7 @@ public class assessBayesPairingOutput {
 		String outputFile = "ModuleScoreSummary.tsv";
 		String moduleRangeFile = "module-range-info.tsv";
 		String moduleInfoFile = "protein-module-structure-info.tsv";
-		
+
 
 		/* determine mapping of protein - refSeqIds - .JSON files */ 
 		List<Protein> proteinList = determineProteinMapping(refSeqIdFile, jsonIdxFile);
@@ -38,7 +38,7 @@ public class assessBayesPairingOutput {
 		 * 
 		 *  TO ADD : check if there's a protein without module-structure information ; maybe make a seperate function to check this
 		 *  */
-		
+
 		System.out.println("searching modules");
 		int fileNotFound = 0; 
 		for(Protein prot: proteinList) {
@@ -68,10 +68,10 @@ public class assessBayesPairingOutput {
 		System.out.println("** print module summary **");
 		System.out.println("modules : " + moduleSummary.size());
 		printCombinedResults(outputFile, moduleSummary);
-		
+
 		System.out.println("** protein info summary **");
 		assessModuleStructureInfo(proteinList, moduleInfoFile);
-		
+
 		System.out.println("** print module range info **");
 		printModuleRange(moduleRangeFile, moduleSummary, proteinList);
 	}
@@ -88,13 +88,13 @@ public class assessBayesPairingOutput {
 
 		System.out.println("Creating protein list:");
 		for(Entry<String, String[]> entry: refSeqIdMap.entrySet()) {
-			
+
 			System.out.print(proteinList.size() + ".");
-			
+
 			if(proteinList.size()%50 == 0) {
 				System.out.println();
 			}
-			
+
 			Protein p = new Protein(entry.getKey());
 			for(String id: entry.getValue()) {
 				p.updateJSONmapping(id, jsonIdxMap.get(id));
@@ -156,7 +156,7 @@ public class assessBayesPairingOutput {
 		}
 
 		for(Protein prot : proteinList) {
-			
+
 			for(Entry<Integer, Double> entry: prot.getModuleSummaryMap().entrySet()) {
 				//System.out.println("module = " + entry.getKey());
 				//System.out.println("value = " + entry.getValue());
@@ -173,15 +173,15 @@ public class assessBayesPairingOutput {
 			BufferedWriter out = new BufferedWriter(new FileWriter(new File(outputFile)));
 
 			out.write("Module\tS>0\tS>0.5\tS>1\tS>1.5\tS>2\tS>2.5\tS>3\tS>3.5\tS>4\n");
-			
+
 			for(int i=0; i<modules.size(); i++) {
 				List<Double> moduleScores = modules.get(i);
-				
+
 				int[] count = new int[9]; 	// 0-4, interval of 0.5
 				// [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4]
-				
+
 				for(double score: moduleScores) {
-					
+
 					int index = 0;
 
 					if(score > 4) {
@@ -233,7 +233,7 @@ public class assessBayesPairingOutput {
 			String line = in.readLine();
 
 			JSONObject rootObject = new JSONObject(line); // Parse the JSON to a JSONObject
-			
+
 			JSONObject a = rootObject.getJSONObject("all_hits").getJSONObject(id); // {270}
 
 			Iterator<String> keys = a.keys();
@@ -254,14 +254,14 @@ public class assessBayesPairingOutput {
 					String[] pos = elements.get(1).toString().split("[,\\[\\]]");
 					String[] pos2 = Arrays.copyOfRange(pos, 2, pos.length);
 					double score = Double.parseDouble(elements.get(2).toString());
-					
+
 					if(score > 0) { // positive score
 						if(!pos2[0].isEmpty()) {
 							if(Integer.parseInt(pos2[0]) > 100) { // ignore models in the CDS
 								modules.add(new Module(Integer.parseInt(k), seq, score, pos2));
 							}	
 						}
-						
+
 					}
 					System.out.print(i + " ");
 				}
@@ -270,7 +270,7 @@ public class assessBayesPairingOutput {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		System.out.println("modules: " + modules.size());
 		return modules;
 	}
@@ -291,37 +291,73 @@ public class assessBayesPairingOutput {
 		}
 
 	}
-	
+
 	public static void printModuleRange(String outputFile, List<List<Double>> modules, List<Protein> protList) {
-		
+
+		double modMin = Double.MAX_VALUE;
+		double modMax = 0;
+
+		double protMin = Double.MAX_VALUE;
+		double protMax = 0;
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(new File(outputFile)));
-			
+
 			out.write("Module\tMinScore\tMaxScore\n");
 			for(int i=0; i<modules.size(); i++) {
-				
+
 				List<Double> mScores = modules.get(i);
 				if(mScores.size() > 0) {
-					out.write(i + "\t" + Collections.min(mScores) + "\t" + Collections.max(mScores) + "\n");
+
+					double currentMin = Collections.min(mScores);
+					double currentMax = Collections.max(mScores);
+
+					if(currentMin < modMin) {
+						modMin = currentMin;
+					}
+
+					if(currentMax > modMax) {
+						modMax = currentMax;
+					}
+
+					out.write(i + "\t" + currentMin + "\t" + currentMax + "\n");
 				}
 				out.flush();
 			}
-			
+
 			out.write("\n\n\n\n");
 			out.write("Protein\tMinScore\tMaxScore\n");
-			
+
 			for(Protein p : protList) {
 				/* get scores */
 				ArrayList<Double> scores = new ArrayList<>(p.getModuleSummaryMap().values());
-				out.write(p.getProteinName() + "\t" + Collections.min(scores) + "\t" + Collections.max(scores) + "\n");
-				out.flush();
+
+				if(!scores.isEmpty()) {
+					double currentMin = Collections.min(scores);
+					double currentMax = Collections.max(scores);
+
+					if(currentMin < protMin) {
+						protMin = currentMin;
+					}
+
+					if(currentMax > protMax) {
+						protMax = currentMax;
+					}
+
+					out.write(p.getProteinName() + "\t" + currentMin + "\t" + currentMax + "\n");
+					out.flush();
+				}
 			}
+
 			out.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+		System.out.println("Module | Min : " + modMin + " | Max : " + modMax);
+		System.out.println("Protein | Min : " + protMin + " | Max : " + protMax);
+
 	}
-	
+
 
 	public static void assessModuleStructureInfo(List<Protein> protList, String outputFile) {
 

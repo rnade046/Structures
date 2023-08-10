@@ -35,7 +35,7 @@ public class MainFDR {
 		//		}
 		//		
 		String motifs_significanceScoresFile = wd +  projectName + "_structure_significantScores.tsv";
-		String nullModel_significanceScoresFile = wd + projectName  + "_structure_significantScores_rand.tsv";
+		String nullModel_significanceScoresFile = wd + projectName  + "_structure_significantScores_rand1.tsv";
 
 		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
