@@ -87,6 +87,10 @@ public class MotifEnrichment {
 						break;
 						case 2: tpd = ClusteringMeasure.getCoreTPD(indexOfProteinsInNetworkAnnotatedByMotif, distanceMatrix, percentThreshold);
 						break;
+						case 3:
+							ArrayList<Double> scores = getScoresAssociatedToAnnotatedPRoteins(col[2].split("\\|"));
+							tpd = ClusteringMeasure.computeWNodeTPD(indexOfProteinsInNetworkAnnotatedByMotif, scores, distanceMatrix);
+							break;
 						}
 
 						/* assess clustering significance */
@@ -176,12 +180,28 @@ public class MotifEnrichment {
 		ArrayList<String> proteinsInNetworkAssociatedToMotifList = new ArrayList<>();
 
 		for(String prot: proteinsAssociatedToMotif) {
-			if(this.indexOfProteinsInNetwork.containsKey(prot)) {
-				proteinsInNetworkAssociatedToMotifList.add(prot);
+			String protFormatted = prot.split("\\_")[0];
+			if(this.indexOfProteinsInNetwork.containsKey(protFormatted)) {
+				proteinsInNetworkAssociatedToMotifList.add(protFormatted);
 			}
 		}
-
 		return proteinsInNetworkAssociatedToMotifList;
+	}
+	
+	private ArrayList<Double> getScoresAssociatedToAnnotatedPRoteins(String[] proteinsAssociatedToMotif){
+
+		ArrayList<Double> proteinScores = new ArrayList<>();
+
+		for(String prot: proteinsAssociatedToMotif) {
+			double score = Double.parseDouble(prot.split("\\_")[1]);
+			String protFormatted = prot.split("\\_")[0];
+			
+			if(this.indexOfProteinsInNetwork.containsKey(protFormatted)) {
+				proteinScores.add(score);
+				
+			}
+		}
+		return proteinScores;
 	}
 
 	/**

@@ -10,44 +10,44 @@ import java.util.PriorityQueue;
 
 public class ClusteringMeasure {
 
-    /**
-     * Computes the total pairwise distance from a list of protein indexes of
-     * interest corresponding to proteins in the network, using the distances found
-     * in the distance matrix
-     * 
-     * @param distance_matrix
-     * @param proteinIdxList : list of protein indexes in distance matrix
-     * @return total pairwise distance
-     **/
-    public static double computeTPD(ArrayList<Integer> proteinIdxList, double[][] distance_matrix) {
-        
-        double distance = 0; // initialize distance
+	/**
+	 * Computes the total pairwise distance from a list of protein indexes of
+	 * interest corresponding to proteins in the network, using the distances found
+	 * in the distance matrix
+	 * 
+	 * @param distance_matrix
+	 * @param proteinIdxList : list of protein indexes in distance matrix
+	 * @return total pairwise distance
+	 **/
+	public static double computeTPD(ArrayList<Integer> proteinIdxList, double[][] distance_matrix) {
 
-        // read distance matrix to get sum of distances between significant proteins
-        for (int i = 0; i < proteinIdxList.size(); i++) {
-            for (int j = i + 1; j < proteinIdxList.size(); j++) {
-            	
-                if (i > distance_matrix.length || j > distance_matrix.length) {
-                    System.out.println("error");
-                }
-                
-                if (distance_matrix[proteinIdxList.get(i)][proteinIdxList.get(j)] == Double.MAX_VALUE || distance == Double.MAX_VALUE) {
-                    distance = Double.MAX_VALUE;
-                } else {
-                    // indexes of proteins of interests are found in the array list indexProt
-                    distance += distance_matrix[proteinIdxList.get(i)][proteinIdxList.get(j)];
-                }
-                
-            }
-        }
-        if(distance == 0.0) {
-        	System.out.println("tpd = 0");
-        }
-        
-        return (double) Math.round(distance * 100d) / 100d;
+		double distance = 0; // initialize distance
 
-    }
-	
+		// read distance matrix to get sum of distances between significant proteins
+		for (int i = 0; i < proteinIdxList.size(); i++) {
+			for (int j = i + 1; j < proteinIdxList.size(); j++) {
+
+				if (i > distance_matrix.length || j > distance_matrix.length) {
+					System.out.println("error");
+				}
+
+				if (distance_matrix[proteinIdxList.get(i)][proteinIdxList.get(j)] == Double.MAX_VALUE || distance == Double.MAX_VALUE) {
+					distance = Double.MAX_VALUE;
+				} else {
+					// indexes of proteins of interests are found in the array list indexProt
+					distance += distance_matrix[proteinIdxList.get(i)][proteinIdxList.get(j)];
+				}
+
+			}
+		}
+		if(distance == 0.0) {
+			System.out.println("tpd = 0");
+		}
+
+		return (double) Math.round(distance * 100d) / 100d;
+
+	}
+
 	/**
 	 * For a given list of protein indexes within the network, identify the core proteins, and compute their top % pairwise distance. 
 	 * 
@@ -58,11 +58,11 @@ public class ClusteringMeasure {
 	 * @return tppd						double top percent pairwise distance
 	 */
 	public static double getTPPD(ArrayList<Integer> annotatedProteinsIndexes, double[][] distanceMatrix, double percentThreshold) {
-		
+
 		/* Identify core nodes */
 		int nodeThreshold = (int) Math.ceil(annotatedProteinsIndexes.size()*percentThreshold); // determine number of core proteins
 		ArrayList<Integer> coreProteins = getCoreProteins(annotatedProteinsIndexes, distanceMatrix, nodeThreshold); 	// Identify core proteins
-		
+
 		/* Calculate total paths */
 		int totalPaths = 0;
 		for(int i=0; i<coreProteins.size(); i++) {
@@ -71,13 +71,13 @@ public class ClusteringMeasure {
 
 		/* determine max number of paths that will be considered */
 		int maxPaths = (int) Math.ceil(totalPaths * percentThreshold);
-		
+
 		/* List sorted paths involving  */
 		ArrayList<Double> sortedPaths = getTopPathsWithMinHeap(coreProteins, annotatedProteinsIndexes, distanceMatrix, maxPaths);
-		
+
 		/* Compute top percent pairwise distance */
 		double tppd = computeTPPD(sortedPaths, percentThreshold);
-		
+
 		return (double) Math.round(tppd * 1000d) / 1000d;
 	}
 
@@ -91,17 +91,17 @@ public class ClusteringMeasure {
 	 * @return coreTPD					double core total pairwise distance
 	 */
 	public static double getCoreTPD(ArrayList<Integer> annotatedProteinsIndexes, double[][] distanceMatrix, double percentThreshold) {
-		
+
 		/* Identify core nodes */
 		int nodeThreshold = (int) Math.ceil(annotatedProteinsIndexes.size()*percentThreshold); // determine number of core proteins
 		ArrayList<Integer> coreProteins = getCoreProteins(annotatedProteinsIndexes, distanceMatrix, nodeThreshold); 	// Identify core proteins
-		
+
 		/* compute total pairwise distance for core proteins */
 		double coreTPD = computeCoreTPD(coreProteins, distanceMatrix);
-		
+
 		return (double) Math.round(coreTPD * 1000d) / 1000d;
 	}
-	
+
 	/**
 	 * Identify core proteins from a list of proteins in the network. Core proteins are the top % nodes with the lowest sum of pairwise distance 
 	 * with all other annotated proteins. The list of core proteins indexes in the network is returned.
@@ -127,15 +127,15 @@ public class ClusteringMeasure {
 			mapOfSumInteractionWeights.put(proteinIdx, sumOfWeights);
 		}
 		/* Sort map by value */
-		
+
 		List<Entry<Integer, Double>> rankedProteinslist = new ArrayList<>(mapOfSumInteractionWeights.entrySet());
 		rankedProteinslist.sort(Entry.comparingByValue());
-		
+
 		/* Identify top % nodes */ 
 		for(int i=0; i<nodeThreshold; i++) {
 			coreProteinsList.add(rankedProteinslist.get(i).getKey());
 		}
-		
+
 		return coreProteinsList;
 	}
 
@@ -157,7 +157,7 @@ public class ClusteringMeasure {
 				coreTPD += distanceMatrix[coreNodesIdxs.get(i)][coreNodesIdxs.get(j)];
 			}
 		}
-		
+
 		return coreTPD;
 	}
 
@@ -174,34 +174,34 @@ public class ClusteringMeasure {
 	private static ArrayList<Double> getTopPathsWithMinHeap(ArrayList<Integer> coreIdxs, ArrayList<Integer> allIdxs, double[][] distanceMatrix, int maxPaths){
 
 		ArrayList<Double> sortedPaths = new ArrayList<>();
-		
+
 		/* sort allIdx */
 		ArrayList<Integer> orderedIdxs = new ArrayList<>();
 		HashSet<Integer> coreIdxSet = new HashSet<>(coreIdxs);
 		orderedIdxs.addAll(coreIdxs);  // add all core indexes to start of list
-		
+
 		for(int idx: allIdxs) {  // add all indexes that aren't core indexes to the rest of the list
 			if(!coreIdxSet.contains(idx)) {
 				orderedIdxs.add(idx);
 			}
 		}
-		
+
 		/* get all paths and store in priority queue */
 		PriorityQueue<Double> pQueue = new PriorityQueue<>();
-		
+
 		for(int i=0; i<coreIdxs.size(); i++) {
 			for(int j=i+1; j<orderedIdxs.size(); j++) {
 				pQueue.add(distanceMatrix[coreIdxs.get(i)][orderedIdxs.get(j)]);
 			}
 		}
-		
+
 		/* get smallest element from pQueue using poll function (which gets and removes element from structure) */
 		for(int i=0; i<maxPaths; i++) {
 			sortedPaths.add(pQueue.poll());
 		}
 		return sortedPaths;
 	}
-	
+
 	/**
 	 * Identify the list of paths the core proteins are part of with all annotated proteins. 
 	 * The list is sorted such that smaller paths are at the top.
@@ -216,21 +216,21 @@ public class ClusteringMeasure {
 	private static ArrayList<Double> getPaths(ArrayList<Integer> coreIdxs, ArrayList<Integer> allIdxs, double[][] distanceMatrix){
 
 		ArrayList<Double> allPaths = new ArrayList<>();
-		
+
 		/* sort allIdx */
 		long startTime = System.currentTimeMillis();
 		ArrayList<Integer> orderedIdxs = new ArrayList<>();
 		orderedIdxs.addAll(coreIdxs);
-		
+
 		for(int idx: allIdxs) {
 			if(!coreIdxs.contains(idx)) {
 				orderedIdxs.add(idx);
 			}
 		}
-		
+
 		long endTime = System.currentTimeMillis();
 		System.out.println("order idxs: " + (endTime - startTime));
-		
+
 		startTime = System.currentTimeMillis();
 		/* get all paths */
 		for(int i=0; i<coreIdxs.size(); i++) {
@@ -240,17 +240,17 @@ public class ClusteringMeasure {
 		}
 		endTime = System.currentTimeMillis();
 		System.out.println("get paths: " + (endTime - startTime));
-		
+
 		startTime = System.currentTimeMillis();
 		Collections.sort(allPaths);   
 		endTime = System.currentTimeMillis();
-				
+
 		System.out.println("sort paths: " + (endTime-startTime));
-		
+
 		return allPaths;
 	}
-	
-	
+
+
 	/**
 	 * Compute the top percent pairwise distance. Measure the sum of the top % paths.
 	 * 
@@ -260,16 +260,30 @@ public class ClusteringMeasure {
 	 * @return tppd		double top percent pairwise distance
 	 */
 	private static double computeTPPD(ArrayList<Double> sortedPaths, double percentThreshold) {
-		
+
 		double tppd = 0;
-		
+
 		for(int i=0; i<sortedPaths.size(); i++) {
 			tppd += sortedPaths.get(i);
 		}
-		
+
 		return tppd;
 	}
-	
+
+	public static double computeWNodeTPD(List<Integer> proteinIdxList, List<Double> proteinScores, double[][] distance_matrix) {
+		double wnodeTPD = 0;
+		
+		for (int i = 0; i < proteinIdxList.size(); i++) {
+			for (int j = i + 1; j < proteinIdxList.size(); j++) {
+				double nodeAverage = (proteinScores.get(i) + proteinScores.get(j)) / (double) 2;
+				double shortestPath = distance_matrix[proteinIdxList.get(i)][proteinIdxList.get(j)];
+				wnodeTPD += shortestPath / nodeAverage;
+			}
+		}
+		return wnodeTPD;
+	}
+
+
 	@SuppressWarnings("unused")
 	private static ArrayList<Double> getTopPathsWithBinarySearch(ArrayList<Integer> coreIdxs, ArrayList<Integer> allIdxs, double[][] distanceMatrix, double threshold){
 		ArrayList<Double> sortedPaths = new ArrayList<>();
@@ -278,7 +292,7 @@ public class ClusteringMeasure {
 		ArrayList<Integer> orderedIdxs = new ArrayList<>();
 		HashSet<Integer> coreIdxSet = new HashSet<>(coreIdxs);
 		orderedIdxs.addAll(coreIdxs);
-		
+
 		for(int idx: allIdxs) {
 			if(!coreIdxSet.contains(idx)) {
 				orderedIdxs.add(idx);
@@ -286,7 +300,7 @@ public class ClusteringMeasure {
 		}
 		long endTime = System.currentTimeMillis();
 		System.out.println("order idxs: " + (endTime - startTime));
-		
+
 		/* Calculate total paths */
 		startTime = System.currentTimeMillis();
 		int totalPaths = 0;
@@ -297,13 +311,13 @@ public class ClusteringMeasure {
 		System.out.println("calc total paths: " + (endTime - startTime));
 		/* determine max number of paths that will be considered */
 		int maxPaths = (int) Math.ceil(totalPaths * threshold);
-		
+
 		startTime = System.currentTimeMillis();
 		for(int i=0; i<coreIdxs.size(); i++) {
 			for(int j=i+1; j<orderedIdxs.size(); j++) {
-				
+
 				double currentPath = distanceMatrix[coreIdxs.get(i)][orderedIdxs.get(j)];
-				
+
 				if(sortedPaths.size() < 1 ) {
 					sortedPaths.add(currentPath);
 				} else if(sortedPaths.size() < maxPaths) {
@@ -322,9 +336,9 @@ public class ClusteringMeasure {
 		System.out.println("get + sort paths : " + (endTime - startTime));
 		return sortedPaths;
 	}
-	
+
 	private static int binarySearch_leftmostIdx(ArrayList<Double> sortedPaths, double currentPath) {
-		
+
 		int l = 0;
 		int r = sortedPaths.size();
 
@@ -337,8 +351,8 @@ public class ClusteringMeasure {
 				r = m;
 			}
 		}
-		
+
 		return l;
 	}
-	
+
 }

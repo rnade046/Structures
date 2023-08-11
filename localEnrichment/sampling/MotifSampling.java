@@ -34,21 +34,21 @@ public class MotifSampling {
 	int clusteringMeasure;
 	double percentThreshold;
 
-	public MotifSampling(String proteinAnnotationFreqFile, ArrayList<Protein> protList, double[][] dm, int clustering_measure, double percent_threshold) {
+	public MotifSampling(String annotationFreqFile, ArrayList<Protein> protList, double[][] dm, int clustering_measure, double percent_threshold) {
 		distanceMatrix = dm;
 		proteinsInNetworkList = protList;
 
 		clusteringMeasure = clustering_measure;
 		percentThreshold = percent_threshold;
 
-		proteinToOccurrenceMap = loadProteinOccurrenceList(proteinAnnotationFreqFile);
+		proteinToOccurrenceMap = loadProteinOccurrenceList(annotationFreqFile);
 		cumulativeSumOfWeights = computeCumulativeSumOfWeights();
 
 		maxCumulativeWeight = cumulativeSumOfWeights[cumulativeSumOfWeights.length-1];
 		protsNotToSample = listProteinsNotToSample();
 
 		if(clustering_measure == 3) {
-			proteinScoreMap = getProteinScores(proteinAnnotationFreqFile);
+			proteinScoreMap = getProteinScores(annotationFreqFile);
 		}
 	}
 
@@ -116,9 +116,7 @@ public class MotifSampling {
 			if(!this.proteinToOccurrenceMap.containsKey(this.proteinsInNetworkList.get(i).getProteinName())) {
 				proteinsNotToSampleList.add(i);
 			}
-
 		}
-
 		return proteinsNotToSampleList;
 	}
 
@@ -237,8 +235,11 @@ public class MotifSampling {
 			break;
 			case 2: tpdSampleList[i] = ClusteringMeasure.getCoreTPD(randomProteins, distanceMatrix, percentThreshold);
 			break;
+			case 3:
+				List<Double> scores = getScoresForSelectedProteins(randomProteins);
+				tpdSampleList[i] = ClusteringMeasure.computeWNodeTPD(randomProteins, scores, distanceMatrix);
+				break;
 			}
-
 		}
 		System.out.print("Done\n");
 		return tpdSampleList;
@@ -322,21 +323,42 @@ public class MotifSampling {
 			String line = in.readLine();
 			while(line !=null) {
 				String[] value = line.split("\t");
-				String[] scores = value[1].split("\\_");
+				String[] scores = value[2].split("\\|");
 				List<Double> scores2 = new ArrayList<>();
-				
+
 				for(String s: scores) {
 					scores2.add(Double.parseDouble(s));
 				}
 				allProtScoreMap.put(value[0], scores2);
 				line = in.readLine();
 			}
-			
+
 			in.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return allProtScoreMap;
 	}
+
+	private List<Double> getScoresForSelectedProteins(List<Integer> selectProteinIndexes){
+
+		List<Double> scores = new ArrayList<>();
+
+		for(int i=0; i<selectProteinIndexes.size(); i++) {
+
+			/* get protein name given it's index in the list of all proteins in network */
+			String protein = this.proteinsInNetworkList.get(selectProteinIndexes.get(i)).getProteinName();
+
+			/* obtain all scores associated to protein */
+			List<Double> scoreOptions = this.proteinScoreMap.get(protein);
+
+			/* obtain a random score from the possible scores */
+			int randomNum = ThreadLocalRandom.current().nextInt(0, scoreOptions.size());
+			scores.add(scoreOptions.get(randomNum));
+		}
+
+		return scores;
+	}
+
 }
 
