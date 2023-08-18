@@ -18,6 +18,7 @@ import sampling.ProteinAnnotations;
 import utils.AnnotationCompanionFile;
 import utils.AssessEnrichment;
 import utils.MotifEnrichment;
+import utils.Scale;
 
 public class Main {
 	public static void main(String[] args) throws FileNotFoundException, IOException {
@@ -101,7 +102,15 @@ public class Main {
 
 		/* accessory set */
 		HashSet<String> proteinSet = NetworkProteins.getProteinSet(proteinList2);
-
+		
+		/* scale scores */
+		String scaledAnnotationFile = wd + "ioFiles/" + networkType + "_scaledAnnotations.tsv";
+		
+		if(clusteringMeasure == 3) {
+			Scale.scaleScores(annotationFile, scaledAnnotationFile);
+			annotationFile = scaledAnnotationFile;
+		}
+		
 		f = new File(annotationCompanionFile);
 		f1 = new File(proteinAnnotationFrequencyFile);
 

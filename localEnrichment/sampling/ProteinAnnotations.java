@@ -83,6 +83,7 @@ public class ProteinAnnotations {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
 		printProteinsToOccurence(outputFile, proteinToFrequencyMap, proteinToScoreMap);
 	}
 
