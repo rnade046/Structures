@@ -13,14 +13,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-public class ProteinAnnotations {
+public class AssessProteinAnnotations {
 
 	private int lowerBoundToSample;
 	private int upperBoundToSample;
 
 	private HashSet<String> proteinSet;
 
-	public ProteinAnnotations(int _lowerBoundToSample, int _upperBoundToSample, HashSet<String> _proteinSet) {
+	public AssessProteinAnnotations(int _lowerBoundToSample, int _upperBoundToSample, HashSet<String> _proteinSet) {
 		this.lowerBoundToSample = _lowerBoundToSample;
 		this.upperBoundToSample = _upperBoundToSample;
 
@@ -36,8 +36,9 @@ public class ProteinAnnotations {
 
 		HashSet<String> motifsToTest = loadMotifsToTest(annotationCompanionFile);
 
-		HashMap<String, Integer> proteinToFrequencyMap = new HashMap<>();
-		HashMap<String, List<Double>> proteinToScoreMap = new HashMap<>();
+		List<Protein> annotatedProteins = new ArrayList<>(); // info about annotated proteins 
+		HashMap<String, Integer> proteinIndex = new HashMap<>(); // index of proteins in annotated protein list (initialized above)
+
 		try {
 			BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(annotationFile))));
 
@@ -49,30 +50,20 @@ public class ProteinAnnotations {
 
 					String[] protein_ids = line.split("\\t")[2].split("\\|"); // idx[2] = protein (name) list + scores
 
-					ArrayList<String> proteinList = checkProteinsInNetwork(protein_ids);
+					HashSet<String> proteinList = checkProteinsInNetwork(protein_ids);
 
 					if(proteinList.size() >= lowerBoundToSample && proteinList.size() <= upperBoundToSample) {
 
 						/* For all proteins of a given annotation; if in list update number of occurrence, otherwise initialize */
-						for(int i=0; i<proteinList.size(); i++) {
-							if(proteinToFrequencyMap.containsKey(proteinList.get(i))) {
-								proteinToFrequencyMap.replace(proteinList.get(i), proteinToFrequencyMap.get(proteinList.get(i)) + 1);
-							} else {
-								proteinToFrequencyMap.put(proteinList.get(i), 1);
-							}
-						}
+						for(int i=0; i<protein_ids.length; i++) {
 
-						/* store scores */
-						for(String protEntry : protein_ids) {
+							String prot = protein_ids[i].split("\\_")[0];
 
-							String prot = protEntry.split("\\_")[0];
-							Double score = Double.parseDouble(protEntry.split("\\_")[1]);
-							if(proteinList.contains(prot)) {
+							if(proteinIndex.containsKey(prot)) {
+								Protein currentProtein = annotatedProteins.get(i);
 
-								if(!proteinToScoreMap.containsKey(prot)) {
-									proteinToScoreMap.put(prot, new ArrayList<Double>());
-								}
-								proteinToScoreMap.get(prot).add(score);
+								currentProtein.updateFrequency(); // update protein count
+								currentProtein.addScores(Double.parseDouble(protein_ids[i].split("\\_")[1])); // update scores
 							}
 						}
 					}
@@ -83,8 +74,8 @@ public class ProteinAnnotations {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		printProteinsToOccurence(outputFile, proteinToFrequencyMap, proteinToScoreMap);
+
+		printProteinsToOccurence(outputFile, annotatedProteins);
 	}
 
 	private HashSet<String> loadMotifsToTest(String annotationCompanionFile){
@@ -114,14 +105,14 @@ public class ProteinAnnotations {
 	 * @param outputFile				text file to contain Protein : Occurrence
 	 * @param proteinToOccurrenceMap	map of {protein: occurrence}
 	 */
-	private static void printProteinsToOccurence(String outputFile, HashMap<String, Integer> proteinToOccurrenceMap, HashMap<String, List<Double>> proteinToScoreMap) {
+	private static void printProteinsToOccurence(String outputFile, List<Protein> proteinInfo) {
 		try {
 			OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(new File(outputFile)));
 			/* iterate through map */
-			for(String protein: proteinToOccurrenceMap.keySet()) {
-				out.write(protein + "\t" + proteinToOccurrenceMap.get(protein) + "\t");
-				
-				for(Double score: proteinToScoreMap.get(protein)) {
+			for(Protein p : proteinInfo) {
+				out.write(p.getProteinName() + "\t" + p.getAnnotationFrequency() + "\t");
+
+				for(Double score: p.getScores()) {
 					out.write(score + "|");
 				}
 				out.write("\n");
@@ -134,9 +125,9 @@ public class ProteinAnnotations {
 
 	}
 
-	private ArrayList<String> checkProteinsInNetwork(String[] proteinList) {
+	private HashSet<String> checkProteinsInNetwork(String[] proteinList) {
 
-		ArrayList<String> finalProteinList = new ArrayList<>();
+		HashSet<String> finalProteinList = new HashSet<>();
 
 		for(String prot: proteinList) {
 

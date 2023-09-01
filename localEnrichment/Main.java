@@ -14,7 +14,7 @@ import network.DistanceMatrix;
 import network.NetworkProteins;
 import sampling.ApproximateNormalDistribuiton;
 import sampling.MotifSampling;
-import sampling.ProteinAnnotations;
+import sampling.AssessProteinAnnotations;
 import utils.AnnotationCompanionFile;
 import utils.AssessEnrichment;
 import utils.MotifEnrichment;
@@ -123,7 +123,7 @@ public class Main {
 			
 			/* Calculate protein annotation frequency */
 			System.out.println("** Enumerating protein annotation frequency files **\n");
-			ProteinAnnotations freq = new ProteinAnnotations(lowerBound, upperBound, proteinSet);
+			AssessProteinAnnotations freq = new AssessProteinAnnotations(lowerBound, upperBound, proteinSet);
 			freq.computeFrequencyOfProteins(annotationFile, annotationCompanionFile, proteinAnnotationFrequencyFile);
 		}
 		
