@@ -190,7 +190,6 @@ public class GenerateAnnotationFile {
 
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(new File(outputFile)));
-
 			out.write("Module\t#Prot\tProteinList\n");
 
 			for(int i=0; i<=270; i++) {
