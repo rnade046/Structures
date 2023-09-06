@@ -37,6 +37,8 @@ public class Scale {
 						String name = prot.split("\\_")[0];
 
 						Double scoreI = Double.parseDouble(prot.split("\\_")[1]);
+						
+						/* scale score */
 						Double scoreF = ((scoreI - rangeI[0])/(rangeI[1] - rangeI[0])) * (rangeF[1] - rangeF[0]) + rangeF[0];
 
 						out.write(name + "_" + scoreF + "|");

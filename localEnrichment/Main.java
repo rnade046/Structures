@@ -135,6 +135,7 @@ public class Main {
 			sampling.computeMultipleDistributions(Integer.parseInt(args[1]), Integer.parseInt(args[2]), numOfSamplings, mcSamplingPrefix, annotationCompanionFile); // 3 - Perform sampling for n proteins
 		}
 
+		
 		if(Boolean.parseBoolean(params.getProperty("calculateNormalDistributionParams"))) {
 			ApproximateNormalDistribuiton.getNormalDistributionParams(mcSamplingPrefix, lowerBound, upperBound, numOfSamplings, normalDistributionParamsFile);
 		}
@@ -142,7 +143,7 @@ public class Main {
 		/* Load and test significance annotations */
 		if(Boolean.parseBoolean(params.getProperty("testMotifs"))) {
 			System.out.println("**Assessing motif clustering**");
-			MotifEnrichment m = new MotifEnrichment(distanceMatrix, proteinList2, normalDistributionParamsFile, lowerBound, upperBound, 0, 0);
+			MotifEnrichment m = new MotifEnrichment(distanceMatrix, proteinList2, normalDistributionParamsFile, lowerBound, upperBound,  clusteringMeasure, 0);
 			m.testMotifClustering(annotationFile, annotationCompanionFile, annotationOutputFile, Integer.parseInt(args[1]), Integer.parseInt(args[2]));
 		}
 

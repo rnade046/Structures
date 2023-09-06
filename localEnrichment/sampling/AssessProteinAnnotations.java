@@ -64,6 +64,9 @@ public class AssessProteinAnnotations {
 
 								currentProtein.updateFrequency(); // update protein count
 								currentProtein.addScores(Double.parseDouble(protein_ids[i].split("\\_")[1])); // update scores
+							} else {
+								annotatedProteins.add(new Protein(prot, Double.parseDouble(protein_ids[i].split("\\_")[1])));
+								proteinIndex.put(prot, annotatedProteins.size()-1);
 							}
 						}
 					}
