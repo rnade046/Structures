@@ -48,6 +48,7 @@ public class Main {
 		String significanceScoreFile = wd + networkType + "_structure_significantScores.tsv";
 
 		int clusteringMeasure = Integer.parseInt(params.getProperty("clusteringMeasure"));
+		double clusteringThreshold = Double.parseDouble(params.getProperty("clusteringThreshold"));
 		
 		/* Load interaction network - from ABC format */ 
 		System.out.println("** Loading interaction repository **");
@@ -131,7 +132,7 @@ public class Main {
 		if(Boolean.parseBoolean(params.getProperty("performMCprocedure"))) {
 			
 			System.out.println("**Performing Monte Carlo Sampling Procedure**");
-			MotifSampling sampling = new MotifSampling(proteinAnnotationFrequencyFile, proteinList2, distanceMatrix, clusteringMeasure, 0); // 2 - Initialize sampling
+			MotifSampling sampling = new MotifSampling(proteinAnnotationFrequencyFile, proteinList2, distanceMatrix, clusteringMeasure, clusteringThreshold); // 2 - Initialize sampling
 			sampling.computeMultipleDistributions(Integer.parseInt(args[1]), Integer.parseInt(args[2]), numOfSamplings, mcSamplingPrefix, annotationCompanionFile); // 3 - Perform sampling for n proteins
 		}
 
@@ -143,7 +144,7 @@ public class Main {
 		/* Load and test significance annotations */
 		if(Boolean.parseBoolean(params.getProperty("testMotifs"))) {
 			System.out.println("**Assessing motif clustering**");
-			MotifEnrichment m = new MotifEnrichment(distanceMatrix, proteinList2, normalDistributionParamsFile, lowerBound, upperBound,  clusteringMeasure, 0);
+			MotifEnrichment m = new MotifEnrichment(distanceMatrix, proteinList2, normalDistributionParamsFile, lowerBound, upperBound,  clusteringMeasure, clusteringThreshold);
 			m.testMotifClustering(annotationFile, annotationCompanionFile, annotationOutputFile, Integer.parseInt(args[1]), Integer.parseInt(args[2]));
 		}
 
