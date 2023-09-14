@@ -132,8 +132,12 @@ public class Main {
 		if(Boolean.parseBoolean(params.getProperty("performMCprocedure"))) {
 			
 			System.out.println("**Performing Monte Carlo Sampling Procedure**");
+			
+			/* compute distribution by number of proteins to sample */
 			MotifSampling sampling = new MotifSampling(proteinAnnotationFrequencyFile, proteinList2, distanceMatrix, clusteringMeasure, clusteringThreshold); // 2 - Initialize sampling
 			sampling.computeMultipleDistributions(Integer.parseInt(args[1]), Integer.parseInt(args[2]), numOfSamplings, mcSamplingPrefix, annotationCompanionFile); // 3 - Perform sampling for n proteins
+			
+			/* compute distribution per annotation */ 
 		}
 
 		

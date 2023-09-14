@@ -134,27 +134,17 @@ public class MotifSampling {
 		HashSet<Integer> nToSample = getListOfNtoSample(annotationCompanionFile);
 
 		for (int n = nProtToSampleLowerBound; n <= nProtToSampleUpperBound; n++) { // range of proteins to sample
-
+			
+			/* determine if distribution should be computed for given number of proteins (n) */
 			if(nToSample.contains(n)) {
 				System.out.println("Computing TPD: " + n);
 
-				String mcFile = mcFilePrefix + "s" + numOfTimesNetworkIsSampled + "_n" + n;
+				/* get distribution */
 				HashMap<Double, Double> distribution = computeMonteCarloDistribution(n, numOfTimesNetworkIsSampled);
 
-				try {
-					BufferedWriter out = new BufferedWriter(new FileWriter(new File(mcFile)));
-
-					out.write("TPD (n = " + n + ")" + "\t" + "Frequency" + "\n");
-					for (double dist : distribution.keySet()) {
-						out.write(dist + "\t" + distribution.get(dist) + "\n");
-						out.flush();
-
-					} 
-					out.write("\n");
-					out.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				/* print distribution*/
+				String mcFile = mcFilePrefix + "s" + numOfTimesNetworkIsSampled + "_n" + n;
+				printDistribution(mcFile, distribution, n);
 			}
 		}
 	}
@@ -179,6 +169,7 @@ public class MotifSampling {
 
 		return nToSample;
 	}
+	
 	/**
 	 * Computes the distribution of TPD for certain amount of randomly selected proteins.
 	 *
@@ -286,7 +277,7 @@ public class MotifSampling {
 	 * @param numProteinsToSample number of proteins to select from network
 	 * @return array of selected protein indexes
 	 */
-	private ArrayList<Integer> getRandomWeightedProteinsWithBinarySearch(int numProteinsToSample) {
+	protected ArrayList<Integer> getRandomWeightedProteinsWithBinarySearch(int numProteinsToSample) {
 		ArrayList<Integer> randomProteinsIdxList = new ArrayList<>();
 
 		/* Selection process occurs until the number of selected proteins equals number of proteins to sample from */ 
@@ -312,7 +303,7 @@ public class MotifSampling {
 		}
 		return randomProteinsIdxList;
 	}
-
+	
 
 	private HashMap<String, List<Double>> getProteinScores(String annotationFile){
 
@@ -360,5 +351,22 @@ public class MotifSampling {
 		return scores;
 	}
 
+	
+	protected void printDistribution(String mcFile, HashMap<Double, Double> distribution, int n) {
+		try {
+			BufferedWriter out = new BufferedWriter(new FileWriter(new File(mcFile)));
+
+			out.write("TPD (n = " + n + ")" + "\t" + "Frequency" + "\n");
+			for (double dist : distribution.keySet()) {
+				out.write(dist + "\t" + distribution.get(dist) + "\n");
+				out.flush();
+
+			} 
+			out.write("\n");
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
 
