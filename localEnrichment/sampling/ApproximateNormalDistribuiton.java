@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class ApproximateNormalDistribuiton {
@@ -177,4 +178,68 @@ public class ApproximateNormalDistribuiton {
 		}
 	}
 
+	
+	public static void getNormalDistributionParamsByModule(String annotationCompanionFile, String mcDistPrefix, int lowerBound, int upperBound, int numSampling, String normalDistParamsFile) {
+
+		HashMap<Integer, Double[]> normalDistributionParamsMap = new HashMap<>();
+		List<Integer> missingDistributions = new ArrayList<>();
+		
+		/* determine annotations that are tested - and therefore will need a MC distribution */
+		HashSet<Integer> motifsToTest = loadMotifsToTest(annotationCompanionFile);
+		
+		System.out.println("Loading mc distributions: ");
+		for(int i: motifsToTest) {
+
+			String mcDistFile = mcDistPrefix + "s" + numSampling + "_n" + i;
+			File f = new File(mcDistFile);
+			
+			/* Calculate params if distribution file exists */
+			if(f.exists()) {			
+				
+				/* Load each distribution individually && check that freq = 1 */
+				
+				HashMap<Double, Double> distributionMap = loadMonteCarloDistributions(mcDistFile);
+				Sampling.checkFrequencyTotal(distributionMap, numSampling);
+
+				/* Calculate normal distribution parameters */
+				double mean = computeDistributionMean(distributionMap);
+				double stdv = computeDistributionStandardDeviation(distributionMap, mean);
+
+				/* Store parameters */
+				normalDistributionParamsMap.put(i, new Double[]{mean, stdv});
+			} else {
+				missingDistributions.add(i);	
+			}
+		}
+		System.out.print("Done\n");
+		/* Output normal distribution parameters */
+		exportDistributionParameters(normalDistributionParamsMap, lowerBound, upperBound, normalDistParamsFile);
+	
+		/* Output missing distributions to console */
+		if(!missingDistributions.isEmpty()) {
+			System.out.println("Missing file for distribution, where n = " + Arrays.toString(missingDistributions.toArray()));
+		}
+	}
+	
+	private static HashSet<Integer> loadMotifsToTest(String annotationCompanionFile){
+
+		HashSet<Integer> motifSet = new HashSet<>();
+
+		try {
+			InputStream in = new FileInputStream(new File(annotationCompanionFile));
+			BufferedReader input = new BufferedReader(new InputStreamReader(in));
+
+			String line = input.readLine();
+
+			while(line != null) {
+				motifSet.add(Integer.parseInt(line.split("\t")[0]));
+				line = input.readLine();
+			}
+
+			input.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return motifSet;
+	}
 }

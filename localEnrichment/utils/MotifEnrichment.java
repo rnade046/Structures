@@ -40,7 +40,7 @@ public class MotifEnrichment {
 		this.percentThreshold = percent_threshold;
 	}
 
-	public void testMotifClustering(String annotationFile, String annotationCompanionFile,String annotationOutputFile, int currentLowerBoundToTest, int currentUpperBoundToTest) {
+	public void testMotifClustering(String annotationFile, String annotationCompanionFile,String annotationOutputFile, int currentLowerBoundToTest, int currentUpperBoundToTest, int samplingMethod) {
 
 
 		/* Load annotations 1 line at a time; 
@@ -94,7 +94,13 @@ public class MotifEnrichment {
 						}
 
 						/* assess clustering significance */
-						double[] params = normalDistributionParams.get(proteinInNetworkAssociatedToMotif.size());
+						double[] params;
+						
+						if(samplingMethod == 0) {
+							params = normalDistributionParams.get(proteinInNetworkAssociatedToMotif.size());
+						} else { 
+							params = normalDistributionParams.get(Integer.parseInt(col[0]));
+						}
 						NormalDistribution nd = new NormalDistribution(params[0], params[1]);
 
 						double p_val = nd.probability(0, tpd);

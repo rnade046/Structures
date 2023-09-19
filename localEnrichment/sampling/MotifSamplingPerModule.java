@@ -22,7 +22,7 @@ public class MotifSamplingPerModule extends MotifSampling {
 		super(annotationFreqFile, protList, dm, clustering_measure, percent_threshold);
 	}
 
-	public void assessMCdistributions(String annotationCompanionFile, String annotationFile, int samplingFreq,  String mcFilePrefix) { 
+	public void computeMCdistributionsForAllModules(String annotationCompanionFile, String annotationFile, int samplingFreq,  String mcFilePrefix) { 
 
 		/* determine annotations that are tested - and therefore will need a MC distribution */
 		HashSet<String> motifsToTest = loadMotifsToTest(annotationCompanionFile);
@@ -59,7 +59,7 @@ public class MotifSamplingPerModule extends MotifSampling {
 			System.out.println("Done\n");
 			input.close();
 		} catch (IOException e) {
-
+			e.printStackTrace();
 		}
 
 	}

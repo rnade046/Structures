@@ -14,6 +14,7 @@ import network.DistanceMatrix;
 import network.NetworkProteins;
 import sampling.ApproximateNormalDistribuiton;
 import sampling.MotifSampling;
+import sampling.MotifSamplingPerModule;
 import sampling.AssessProteinAnnotations;
 import utils.AnnotationCompanionFile;
 import utils.AssessEnrichment;
@@ -49,7 +50,7 @@ public class Main {
 
 		int clusteringMeasure = Integer.parseInt(params.getProperty("clusteringMeasure"));
 		double clusteringThreshold = Double.parseDouble(params.getProperty("clusteringThreshold"));
-		
+
 		/* Load interaction network - from ABC format */ 
 		System.out.println("** Loading interaction repository **");
 		ArrayList<Interaction> interactionList = CorrelationGraphLoader.loadGraphFromCorrelationNetwork(networkFile, proteinMappingFile);
@@ -103,53 +104,62 @@ public class Main {
 
 		/* accessory set */
 		HashSet<String> proteinSet = NetworkProteins.getProteinSet(proteinList2);
-		
+
 		/* scale scores */
 		String scaledAnnotationFile = wd + "ioFiles/" + networkType + "_scaledAnnotations.tsv";
-		
+
 		if(clusteringMeasure == 3) {
 			Scale.scaleScores(annotationFile, scaledAnnotationFile);
 			annotationFile = scaledAnnotationFile;
 		}
-		
+
 		f = new File(annotationCompanionFile);
 		f1 = new File(proteinAnnotationFrequencyFile);
 
 		if(!f1.exists() && !f1.isDirectory()) {
-			
+
 			if(!f.exists() && !f.isDirectory()) {
 				System.out.println("** Generating companion file **\n");
 				AnnotationCompanionFile.determineAnnotatedProteinsInNetwork(annotationFile, annotationCompanionFile, proteinSet, lowerBound, upperBound);
 			}
-			
+
 			/* Calculate protein annotation frequency */
 			System.out.println("** Enumerating protein annotation frequency files **\n");
 			AssessProteinAnnotations freq = new AssessProteinAnnotations(lowerBound, upperBound, proteinSet);
 			freq.computeFrequencyOfProteins(annotationFile, annotationCompanionFile, proteinAnnotationFrequencyFile);
 		}
-		
+
 		/* Perform Monte Carlo Sampling procedure */
 		if(Boolean.parseBoolean(params.getProperty("performMCprocedure"))) {
-			
+
 			System.out.println("**Performing Monte Carlo Sampling Procedure**");
-			
+
 			/* compute distribution by number of proteins to sample */
-			MotifSampling sampling = new MotifSampling(proteinAnnotationFrequencyFile, proteinList2, distanceMatrix, clusteringMeasure, clusteringThreshold); // 2 - Initialize sampling
-			sampling.computeMultipleDistributions(Integer.parseInt(args[1]), Integer.parseInt(args[2]), numOfSamplings, mcSamplingPrefix, annotationCompanionFile); // 3 - Perform sampling for n proteins
-			
-			/* compute distribution per annotation */ 
+			if(Integer.parseInt(params.getProperty("samplingMethod"))==0) {
+				MotifSampling sampling = new MotifSampling(proteinAnnotationFrequencyFile, proteinList2, distanceMatrix, clusteringMeasure, clusteringThreshold); // 2 - Initialize sampling
+				sampling.computeMultipleDistributions(Integer.parseInt(args[1]), Integer.parseInt(args[2]), numOfSamplings, mcSamplingPrefix, annotationCompanionFile); // 3 - Perform sampling for n proteins
+
+			} else { 
+				/* compute distribution per annotation */ 
+				MotifSamplingPerModule sampling = new MotifSamplingPerModule(proteinAnnotationFrequencyFile, proteinList2, distanceMatrix, clusteringMeasure, clusteringThreshold);
+				sampling.computeMCdistributionsForAllModules(annotationCompanionFile, annotationFile, numOfSamplings, mcSamplingPrefix);
+			}
+
 		}
 
-		
 		if(Boolean.parseBoolean(params.getProperty("calculateNormalDistributionParams"))) {
-			ApproximateNormalDistribuiton.getNormalDistributionParams(mcSamplingPrefix, lowerBound, upperBound, numOfSamplings, normalDistributionParamsFile);
+			if(Integer.parseInt(params.getProperty("samplingMethod"))==0) {
+				ApproximateNormalDistribuiton.getNormalDistributionParams(mcSamplingPrefix, lowerBound, upperBound, numOfSamplings, normalDistributionParamsFile);
+			} else { 
+				ApproximateNormalDistribuiton.getNormalDistributionParamsByModule(annotationCompanionFile, mcSamplingPrefix, lowerBound, upperBound, numOfSamplings, normalDistributionParamsFile);
+			}
 		}
 
 		/* Load and test significance annotations */
 		if(Boolean.parseBoolean(params.getProperty("testMotifs"))) {
 			System.out.println("**Assessing motif clustering**");
 			MotifEnrichment m = new MotifEnrichment(distanceMatrix, proteinList2, normalDistributionParamsFile, lowerBound, upperBound,  clusteringMeasure, clusteringThreshold);
-			m.testMotifClustering(annotationFile, annotationCompanionFile, annotationOutputFile, Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+			m.testMotifClustering(annotationFile, annotationCompanionFile, annotationOutputFile, Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(params.getProperty("samplingMethod")));
 		}
 
 		/* Look at the overall distribution of significance scores once all annotations have been tested */
