@@ -142,7 +142,7 @@ public class Main {
 			} else { 
 				/* compute distribution per annotation */ 
 				MotifSamplingPerModule sampling = new MotifSamplingPerModule(proteinAnnotationFrequencyFile, proteinList2, distanceMatrix, clusteringMeasure, clusteringThreshold);
-				sampling.computeMCdistributionsForAllModules(annotationCompanionFile, annotationFile, numOfSamplings, mcSamplingPrefix);
+				sampling.computeMCdistributionsForAllModules(annotationCompanionFile, annotationFile, numOfSamplings, mcSamplingPrefix, Integer.parseInt(args[1]));
 			}
 
 		}

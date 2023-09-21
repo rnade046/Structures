@@ -22,7 +22,7 @@ public class MotifSamplingPerModule extends MotifSampling {
 		super(annotationFreqFile, protList, dm, clustering_measure, percent_threshold);
 	}
 
-	public void computeMCdistributionsForAllModules(String annotationCompanionFile, String annotationFile, int samplingFreq,  String mcFilePrefix) { 
+	public void computeMCdistributionsForAllModules(String annotationCompanionFile, String annotationFile, int samplingFreq,  String mcFilePrefix, int moduleToSample) { 
 
 		/* determine annotations that are tested - and therefore will need a MC distribution */
 		HashSet<String> motifsToTest = loadMotifsToTest(annotationCompanionFile);
@@ -33,25 +33,31 @@ public class MotifSamplingPerModule extends MotifSampling {
 			BufferedReader input = new BufferedReader(new InputStreamReader(in));
 
 			String line = input.readLine(); // no header
-			int moduleCount = 0;
+
 			while(line!=null) {
 
 				String col[] = line.split("\t");
+				int moduleCount = Integer.parseInt(line.split("\t")[0]);
 
-				if(motifsToTest.contains(col[0])) {
-					
-					/* obtain scores */
-					String[] elements = col[2].split("\\|");
-					List<Double> scores = new ArrayList<>();
-					
-					for(String e : elements) { // e = ProteinName_Score
-						scores.add(Double.parseDouble(e.split("\\_")[1]));
+				if(moduleCount == moduleToSample) {
+					if(motifsToTest.contains(col[0])) {
+
+						System.out.println("Computing TPD for module: " + col[0]);
+
+						/* obtain scores */
+						String[] elements = col[2].split("\\|");
+						List<Double> scores = new ArrayList<>();
+
+						for(String e : elements) { // e = ProteinName_Score
+							scores.add(Double.parseDouble(e.split("\\_")[1]));
+						}
+						System.out.println("Number of proteins: " + scores.size());
+
+						/* obtain MC sampling distribution */
+						HashMap<Double, Double> distribution = computeMCdistributionForCurrentAnnotation(scores, samplingFreq);
+						String mcFile = mcFilePrefix + "s" + samplingFreq + "_n" + col[0];
+						printDistribution(mcFile, distribution, moduleCount);
 					}
-
-					/* obtain MC sampling distribution */
-					HashMap<Double, Double> distribution = computeMCdistributionForCurrentAnnotation(scores, samplingFreq);
-					String mcFile = mcFilePrefix + "s" + samplingFreq + "_n" + moduleCount;
-					printDistribution(mcFile, distribution, moduleCount);
 				}
 				line = input.readLine();
 				moduleCount++;
@@ -65,32 +71,38 @@ public class MotifSamplingPerModule extends MotifSampling {
 	}
 
 	private HashMap<Double, Double> computeMCdistributionForCurrentAnnotation(List<Double> scores, int samplingFrequency) {
-		
-		
+
+
 		HashMap<Double, Double> distribution;
 		double[] tpdSampleList = new double[samplingFrequency]; // array to store the results of sampling {list of TPDs}
-		
+
 		for(int i=0; i<samplingFrequency; i++) {
-			
+			if(i%1000==0) {
+				System.out.print(i+".");
+			}
+
+			if(i%10000==0) {
+				System.out.println();
+			}
 			/* Select random proteins in network */
 			ArrayList<Integer> randomProteins = getRandomWeightedProteinsWithBinarySearch(scores.size());
-			
+
 			/* Assign scores to random proteins by shuffling list order */
 			Collections.shuffle(scores);
-			
+
 			/* compute the clustering measure */ 
 			tpdSampleList[i] = ClusteringMeasure.computeWNodeTPD(randomProteins, scores, distanceMatrix);
 		}
-	
+
 		/* Measure the frequencies of sampled total pairwise distances from x amount of proteins */
 		distribution = Sampling.computeFrequenciesOfSampledTPDs(tpdSampleList, samplingFrequency);
 
 		/* Sanity check to ensure the sum of TPD frequencies equals 1 */
 		Sampling.checkFrequencyTotal(distribution, samplingFrequency);
-		
+
 		return distribution;
 	}
-	
+
 	private HashSet<String> loadMotifsToTest(String annotationCompanionFile){
 
 		HashSet<String> motifSet = new HashSet<>();
