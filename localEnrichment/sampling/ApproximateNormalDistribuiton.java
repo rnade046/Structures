@@ -161,6 +161,7 @@ public class ApproximateNormalDistribuiton {
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(new File(fileName)));
 			writer.write("nProt\tMean\tSd\n");
+			
 			for (int nProt=lowerBound; nProt<=upperBound; nProt++){
 				Double[] params = new Double[] {0.0, 0.0};
 
@@ -179,7 +180,7 @@ public class ApproximateNormalDistribuiton {
 	}
 
 	
-	public static void getNormalDistributionParamsByModule(String annotationCompanionFile, String mcDistPrefix, int lowerBound, int upperBound, int numSampling, String normalDistParamsFile) {
+	public static void getNormalDistributionParamsByModule(String annotationCompanionFile, String mcDistPrefix, int moduleCountLowerRange, int moduleCountUpperRange, int numSampling, String normalDistParamsFile) {
 
 		HashMap<Integer, Double[]> normalDistributionParamsMap = new HashMap<>();
 		List<Integer> missingDistributions = new ArrayList<>();
@@ -213,7 +214,7 @@ public class ApproximateNormalDistribuiton {
 		}
 		System.out.print("Done\n");
 		/* Output normal distribution parameters */
-		exportDistributionParameters(normalDistributionParamsMap, lowerBound, upperBound, normalDistParamsFile);
+		exportDistributionParameters(normalDistributionParamsMap, moduleCountLowerRange, moduleCountUpperRange, normalDistParamsFile);
 	
 		/* Output missing distributions to console */
 		if(!missingDistributions.isEmpty()) {

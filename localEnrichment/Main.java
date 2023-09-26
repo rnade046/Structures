@@ -151,7 +151,7 @@ public class Main {
 			if(Integer.parseInt(params.getProperty("samplingMethod"))==0) {
 				ApproximateNormalDistribuiton.getNormalDistributionParams(mcSamplingPrefix, lowerBound, upperBound, numOfSamplings, normalDistributionParamsFile);
 			} else { 
-				ApproximateNormalDistribuiton.getNormalDistributionParamsByModule(annotationCompanionFile, mcSamplingPrefix, lowerBound, upperBound, numOfSamplings, normalDistributionParamsFile);
+				ApproximateNormalDistribuiton.getNormalDistributionParamsByModule(annotationCompanionFile, mcSamplingPrefix, Integer.parseInt(args[1]), Integer.parseInt(args[2]), numOfSamplings, normalDistributionParamsFile);
 			}
 		}
 
