@@ -43,17 +43,19 @@ public class IndexJSONFiles {
 					String refSeq = line.split(">")[1];
 					String jsonPrefix = "bp_corrNet2-400_3utr_w100cds_" + condition + "_" + i + "_"+ refSeqCount+ ".json"; // format JSON file name 
 					
-					out.write(refSeq + "\t" + jsonPrefix + "\n");
+					out.write(refSeq + "\t" + jsonPrefix + "\t");
 					out.flush();
 					
 					// skip 3 lines
 					for(int j=0; j<3; j++) {
 						line = in.readLine();
+						
+						if(j==0) {
+							out.write(line.length() + "\n");
+						}
 					}
 					refSeqCount++;
 				}
-				
-			
 				in.close();
 			}
 			

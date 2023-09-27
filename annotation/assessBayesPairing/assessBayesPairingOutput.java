@@ -22,21 +22,24 @@ public class assessBayesPairingOutput {
 	public static void main(String[] args) {
 
 		String wd = args[0];
-
-		String jsonIdxFile = "jsonIdxOfRefSeqIds.tsv";
+		String condition = args[1];
+		
+		String jsonIdxFile = "jsonIdxOfRefSeqIds_" + condition + ".tsv";
 		String refSeqIdFile = "corrNetTop2-400_proteinsInNetwork_info.tsv";
 
-		String outputFile = "ModuleScoreSummary.tsv";
-		String moduleRangeFile = "module-range-info.tsv";
-		String moduleInfoFile = "protein-module-structure-info.tsv";
-
+		String outputFile = "ModuleScoreSummary" + condition + ".tsv";
+		String moduleRangeFile = "module-range-info" + condition + ".tsv";
+		String moduleInfoFile = "protein-module-structure-info" + condition + ".tsv";
+		String jsonInfoFile = "json-information0" + condition + ".tsv";
 
 		/* determine mapping of protein - refSeqIds - .JSON files */ 
 		List<Protein> proteinList = determineProteinMapping(refSeqIdFile, jsonIdxFile);
 
+		/* initialize map <JSON file : JSON entry> */
+		HashMap<String, JSON> jsonMapping = initializeJSONmapping(jsonIdxFile);
 		/* search for modules
 		 * 
-		 *  TO ADD : check if there's a protein without module-structure information ; maybe make a seperate function to check this
+		 *  TO ADD : check if there's a protein without module-structure information ; maybe make a separate function to check this
 		 *  */
 
 		System.out.println("searching modules");
@@ -49,10 +52,12 @@ public class assessBayesPairingOutput {
 				System.out.println(prot.getFileIdMap().get(jsonFileSuffix) + " - checked");
 				String jsonFile = wd + jsonFileSuffix;
 
+				jsonMapping.get(jsonFileSuffix).setProtein(prot.getProteinName());
+
 				File f = new File(jsonFile);
 				if(f.exists()) {
 					prot.updateMultipleModules(loadJson(jsonFile, prot.getFileIdMap().get(jsonFileSuffix)));
-
+					jsonMapping.get(jsonFileSuffix).fileExists();
 				} else {
 					System.out.println(prot.getFileIdMap().get(jsonFileSuffix) + " - file not found");
 					prot.addMissedId(prot.getFileIdMap().get(jsonFileSuffix) ); // add missed ID to list
@@ -74,6 +79,10 @@ public class assessBayesPairingOutput {
 
 		System.out.println("** print module range info **");
 		printModuleRange(moduleRangeFile, moduleSummary, proteinList);
+
+		/* print JSON file information */
+		System.out.println("** print json info file **");
+		printJSONinfo(jsonInfoFile, jsonMapping);
 	}
 
 	public static List<Protein> determineProteinMapping(String refSeqToProteinFile, String refSeqToJSONFile) {
@@ -383,4 +392,50 @@ public class assessBayesPairingOutput {
 
 	}
 
+	public static HashMap<String, JSON> initializeJSONmapping(String jsonIndexFile){
+
+		HashMap<String, JSON> jsonMapping = new HashMap<>();
+
+		try {
+			BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(jsonIndexFile)));
+
+			String line = in.readLine();
+			while(line!=null) {
+
+				String[] col = line.split("\t");
+				jsonMapping.put(col[1], new JSON(col[1], col[0], Integer.parseInt(col[2])));
+
+				line = in.readLine();
+			}
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return jsonMapping;
+	}
+
+	public static void printJSONinfo(String outputFile, HashMap<String, JSON> jsonMapping) {
+
+		try {
+			BufferedWriter out = new BufferedWriter(new FileWriter(new File(outputFile)));
+
+			out.write("JSONFile\tRefSeqId\tProtein\tExists\n");
+
+			for(JSON json : jsonMapping.values()) {
+				
+				String[] values = json.getEntry();
+				for(int i=0; i<values.length; i++) {
+					out.write(values[i] + "\t");
+				}
+				out.write("\n");
+				out.flush();
+			}
+
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
 }
