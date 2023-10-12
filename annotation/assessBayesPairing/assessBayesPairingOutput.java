@@ -23,17 +23,18 @@ public class assessBayesPairingOutput {
 
 		String wd = args[0];
 		String condition = args[1];
-		
+		boolean shuffled = Boolean. parseBoolean(args[2]);
+
 		String jsonIdxFile = "jsonIdxOfRefSeqIds_" + condition + ".tsv";
 		String refSeqIdFile = "corrNetTop2-400_proteinsInNetwork_info.tsv";
 
 		String outputFile = "ModuleScoreSummary" + condition + ".tsv";
 		String moduleRangeFile = "module-range-info" + condition + ".tsv";
 		String moduleInfoFile = "protein-module-structure-info" + condition + ".tsv";
-		String jsonInfoFile = "json-information0" + condition + ".tsv";
+		String jsonInfoFile = "json-information-" + condition + ".tsv";
 
 		/* determine mapping of protein - refSeqIds - .JSON files */ 
-		List<Protein> proteinList = determineProteinMapping(refSeqIdFile, jsonIdxFile);
+		List<Protein> proteinList = determineProteinMapping(refSeqIdFile, jsonIdxFile, shuffled);
 
 		/* initialize map <JSON file : JSON entry> */
 		HashMap<String, JSON> jsonMapping = initializeJSONmapping(jsonIdxFile);
@@ -49,15 +50,21 @@ public class assessBayesPairingOutput {
 
 			for(String jsonFileSuffix :prot.getFileIdMap().keySet()) {
 
-				System.out.println(prot.getFileIdMap().get(jsonFileSuffix) + " - checked");
+				System.out.println(prot.getFileIdMap().get(jsonFileSuffix) + " - checked"); //
 				String jsonFile = wd + jsonFileSuffix;
 
-				jsonMapping.get(jsonFileSuffix).setProtein(prot.getProteinName());
+				System.out.println("jsonFileSuffix: " + jsonFileSuffix);
 
+				if(jsonMapping.containsKey(jsonFileSuffix)) {
+					jsonMapping.get(jsonFileSuffix).setProtein(prot.getProteinName());
+				}
 				File f = new File(jsonFile);
 				if(f.exists()) {
 					prot.updateMultipleModules(loadJson(jsonFile, prot.getFileIdMap().get(jsonFileSuffix)));
-					jsonMapping.get(jsonFileSuffix).fileExists();
+
+					if(jsonMapping.containsKey(jsonFileSuffix)) {
+						jsonMapping.get(jsonFileSuffix).fileExists();
+					}
 				} else {
 					System.out.println(prot.getFileIdMap().get(jsonFileSuffix) + " - file not found");
 					prot.addMissedId(prot.getFileIdMap().get(jsonFileSuffix) ); // add missed ID to list
@@ -85,7 +92,7 @@ public class assessBayesPairingOutput {
 		printJSONinfo(jsonInfoFile, jsonMapping);
 	}
 
-	public static List<Protein> determineProteinMapping(String refSeqToProteinFile, String refSeqToJSONFile) {
+	public static List<Protein> determineProteinMapping(String refSeqToProteinFile, String refSeqToJSONFile, boolean shuffled) {
 
 		List<Protein> proteinList = new ArrayList<>();
 
@@ -93,7 +100,7 @@ public class assessBayesPairingOutput {
 		HashMap<String, String> jsonIdxMap = loadJSONIdx(refSeqToJSONFile);
 
 		System.out.println("loading refSeqIds");
-		HashMap<String, String[]> refSeqIdMap = loadRefSeqId(refSeqToProteinFile);
+		HashMap<String, String[]> refSeqIdMap = loadRefSeqId(refSeqToProteinFile, shuffled);
 
 		System.out.println("Creating protein list:");
 		for(Entry<String, String[]> entry: refSeqIdMap.entrySet()) {
@@ -115,7 +122,7 @@ public class assessBayesPairingOutput {
 	}
 
 	/** load map of RefSeqIds to protein names */
-	public static HashMap<String, String[]> loadRefSeqId(String refSeqToProteinFile){
+	public static HashMap<String, String[]> loadRefSeqId(String refSeqToProteinFile, boolean shuffled){
 
 		HashMap<String, String[]> refSeqIdMap = new HashMap<>(); // Protein = {Id1, Id2, ..., IdN}
 		try {
@@ -125,7 +132,20 @@ public class assessBayesPairingOutput {
 			while(line!=null) {
 				String[] col = line.split("\t");
 				if(col.length > 1) {
-					refSeqIdMap.put(col[0], col[1].split("\\|"));	
+
+					String[] ids = col[1].split("\\|");
+					if(shuffled) {
+						String[] idShuffled = new String[ids.length];
+						for(int i=0; i<ids.length; i++) {
+							idShuffled[i] = ids[i] + "_Shuffled";
+						}
+
+						refSeqIdMap.put(col[0], idShuffled);
+					} else {
+						refSeqIdMap.put(col[0], ids);	
+					}
+
+
 				}
 				line = in.readLine();
 			}
@@ -145,6 +165,7 @@ public class assessBayesPairingOutput {
 			String line = in.readLine();
 			while(line!=null) {
 				String[] col = line.split("\t");
+
 				jsonIdxMap.put(col[0], col[1]);
 
 				line = in.readLine();
@@ -243,36 +264,39 @@ public class assessBayesPairingOutput {
 
 			JSONObject rootObject = new JSONObject(line); // Parse the JSON to a JSONObject
 
-			JSONObject a = rootObject.getJSONObject("all_hits").getJSONObject(id); // {270}
+			if(rootObject.getJSONObject("all_hits").has(id)){
+				
+				JSONObject a = rootObject.getJSONObject("all_hits").getJSONObject(id); // {270}
 
-			Iterator<String> keys = a.keys();
+				Iterator<String> keys = a.keys();
 
-			while(keys.hasNext()){
+				while(keys.hasNext()){
 
-				/* load modules */
-				String k = keys.next();
-				JSONArray m = a.getJSONArray(k); 
+					/* load modules */
+					String k = keys.next();
+					JSONArray m = a.getJSONArray(k); 
 
-				//System.out.println("k = " + k + " ; ");
+					//System.out.println("k = " + k + " ; ");
 
-				for(int i=0; i < m.length(); i++) {
+					for(int i=0; i < m.length(); i++) {
 
-					/* each instance of a module */
-					JSONArray elements = m.getJSONArray(i);
-					String seq = elements.get(0).toString();
-					String[] pos = elements.get(1).toString().split("[,\\[\\]]");
-					String[] pos2 = Arrays.copyOfRange(pos, 2, pos.length);
-					double score = Double.parseDouble(elements.get(2).toString());
+						/* each instance of a module */
+						JSONArray elements = m.getJSONArray(i);
+						String seq = elements.get(0).toString();
+						String[] pos = elements.get(1).toString().split("[,\\[\\]]");
+						String[] pos2 = Arrays.copyOfRange(pos, 2, pos.length);
+						double score = Double.parseDouble(elements.get(2).toString());
 
-					if(score > 0) { // positive score
-						if(!pos2[0].isEmpty()) {
-							if(Integer.parseInt(pos2[0]) > 100) { // ignore models in the CDS
-								modules.add(new Module(Integer.parseInt(k), seq, score, pos2));
-							}	
+						if(score > 0) { // positive score
+							if(!pos2[0].isEmpty()) {
+								if(Integer.parseInt(pos2[0]) > 100) { // ignore models in the CDS
+									modules.add(new Module(Integer.parseInt(k), seq, score, pos2));
+								}	
+							}
+
 						}
-
+						System.out.print(i + " ");
 					}
-					System.out.print(i + " ");
 				}
 			}
 			in.close();
@@ -420,10 +444,10 @@ public class assessBayesPairingOutput {
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(new File(outputFile)));
 
-			out.write("JSONFile\tRefSeqId\tProtein\tExists\n");
+			out.write("JSONFile\tRefSeqId\tProtein\tSeqSize\tExists\n");
 
 			for(JSON json : jsonMapping.values()) {
-				
+
 				String[] values = json.getEntry();
 				for(int i=0; i<values.length; i++) {
 					out.write(values[i] + "\t");

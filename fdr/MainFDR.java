@@ -34,8 +34,8 @@ public class MainFDR {
 		//		break;
 		//		}
 		//		
-		String motifs_significanceScoresFile = wd + "fdr/TPD-nodeScores/" + projectName + "_tpd_fwd_nodeScores_structure_significantScores.tsv";
-		String nullModel_significanceScoresFile = wd + "fdr/TPD-nodeScores/" + projectName  + "_tpd_rand1_nodeScores_structure_significantScores.tsv";
+		String motifs_significanceScoresFile = wd + "fdr/bp4/" + projectName + "_nwTPD_fwd_bp4_structure_significantScores.tsv";
+		String nullModel_significanceScoresFile = wd + "fdr/bp4/" + projectName  + "_nwTPD_rand1_bp4_structure_significantScores.tsv";
 
 		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());

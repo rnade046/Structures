@@ -6,3 +6,6 @@ bin/MainFDR.class
 fdr/MainFDR.java
 fdr/MainFDR.java
 bin/MainFDR.class
+*.java
+fdr/MainFDR.java
+bin/MainFDR.class
