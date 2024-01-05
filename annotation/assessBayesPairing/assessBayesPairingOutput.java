@@ -32,6 +32,8 @@ public class assessBayesPairingOutput {
 		String moduleRangeFile = "module-range-info" + condition + ".tsv";
 		String moduleInfoFile = "protein-module-structure-info" + condition + ".tsv";
 		String jsonInfoFile = "json-information-" + condition + ".tsv";
+		
+		String percentilesFile = "percentile-info" + condition + ".tsv";
 
 		/* determine mapping of protein - refSeqIds - .JSON files */ 
 		List<Protein> proteinList = determineProteinMapping(refSeqIdFile, jsonIdxFile, shuffled);
@@ -73,8 +75,11 @@ public class assessBayesPairingOutput {
 			}
 			prot.summarizeModules();
 		}
-		System.out.println("** File not found : " + fileNotFound + " **");
-
+		System.out.println("** Files not found : " + fileNotFound + " **");
+		
+		System.out.println("** determine score percentiles **");
+		CalculatePercentileRanks.determinePercentiles(proteinList, percentilesFile);
+		
 		List<List<Double>> moduleSummary = combineModuleCounts(proteinList);
 
 		System.out.println("** print module summary **");
