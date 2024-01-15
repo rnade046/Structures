@@ -8,10 +8,10 @@ public class JSON {
 	private int seqLength;
 	private boolean exists;
 	
-	public JSON(String json, String id, int l) {
+	public JSON(String json, String id) {
 		this.jsonFile = json;
 		this.refSeqId = id;
-		this.seqLength = l; 
+		this.seqLength = 100; 
 		this.exists = false;
 	}
 	

@@ -28,12 +28,12 @@ public class assessBayesPairingOutput {
 		String jsonIdxFile = "jsonIdxOfRefSeqIds_" + condition + ".tsv";
 		String refSeqIdFile = "corrNetTop2-400_proteinsInNetwork_info.tsv";
 
-		String outputFile = "ModuleScoreSummary" + condition + ".tsv";
-		String moduleRangeFile = "module-range-info" + condition + ".tsv";
-		String moduleInfoFile = "protein-module-structure-info" + condition + ".tsv";
+		String outputFile = "ModuleScoreSummary-" + condition + ".tsv";
+		String moduleRangeFile = "module-range-info-" + condition + ".tsv";
+		String moduleInfoFile = "protein-module-structure-info-" + condition + ".tsv";
 		String jsonInfoFile = "json-information-" + condition + ".tsv";
 		
-		String percentilesFile = "percentile-info" + condition + ".tsv";
+		String percentilesFile = "percentile-info-" + condition + ".tsv";
 
 		/* determine mapping of protein - refSeqIds - .JSON files */ 
 		List<Protein> proteinList = determineProteinMapping(refSeqIdFile, jsonIdxFile, shuffled);
@@ -432,7 +432,7 @@ public class assessBayesPairingOutput {
 			while(line!=null) {
 
 				String[] col = line.split("\t");
-				jsonMapping.put(col[1], new JSON(col[1], col[0], Integer.parseInt(col[2])));
+				jsonMapping.put(col[1], new JSON(col[1], col[0]));
 
 				line = in.readLine();
 			}
