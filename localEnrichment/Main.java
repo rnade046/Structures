@@ -20,6 +20,7 @@ import utils.AnnotationCompanionFile;
 import utils.AssessEnrichment;
 import utils.MotifEnrichment;
 import utils.Scale;
+import utils.ScorePercentiles;
 
 public class Main {
 	public static void main(String[] args) throws FileNotFoundException, IOException {
@@ -88,14 +89,12 @@ public class Main {
 			System.out.println("** Updating distance matrix for connected component **");
 			distanceMatrix = DistanceMatrix.updateDistanceMatrix(proteinsToKeep, distanceMatrix, connectedComponentDistMatrixFile);
 
-
 		} else {
 			/* Load distance matrix representing fully connected component */
 			System.out.println("** Connected Component distance matrix **\n");
 			proteinList2 = NetworkProteins.loadProteinsInNetwork(proteinMappingFile2);
 			distanceMatrix = DistanceMatrix.loadDistanceMatrix(connectedComponentDistMatrixFile, proteinList2);
 		}
-
 
 		/* Parameters for enrichment */
 		int lowerBound = Integer.parseInt(params.getProperty("lowerBoundToSample", "3"));
@@ -106,11 +105,19 @@ public class Main {
 		HashSet<String> proteinSet = NetworkProteins.getProteinSet(proteinList2);
 
 		/* scale scores */
-		String scaledAnnotationFile = wd + "ioFiles/" + networkType + "_scaledAnnotations.tsv";
-
 		if(clusteringMeasure == 3) {
+			String scaledAnnotationFile = wd + "ioFiles/" + networkType + "_scaledAnnotations.tsv";
+			
 			Scale.scaleScores(annotationFile, scaledAnnotationFile);
 			annotationFile = scaledAnnotationFile;
+		}
+		
+		if(clusteringMeasure == 4) {
+			String percentileAnnotationFile = wd + "ioFiles/" + networkType + "_percentileAnnotations.tsv";
+			String percentilesFile = wd + params.getProperty("percentilesFile");
+			
+			ScorePercentiles.assignScorePercentile(annotationFile, percentilesFile, annotationFile);
+			annotationFile = percentileAnnotationFile;
 		}
 
 		f = new File(annotationCompanionFile);
@@ -144,7 +151,6 @@ public class Main {
 				MotifSamplingPerModule sampling = new MotifSamplingPerModule(proteinAnnotationFrequencyFile, proteinList2, distanceMatrix, clusteringMeasure, clusteringThreshold);
 				sampling.computeMCdistributionsForAllModules(annotationCompanionFile, annotationFile, numOfSamplings, mcSamplingPrefix, Integer.parseInt(args[1]));
 			}
-
 		}
 
 		if(Boolean.parseBoolean(params.getProperty("calculateNormalDistributionParams"))) {

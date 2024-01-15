@@ -134,7 +134,7 @@ public class MotifSampling {
 		HashSet<Integer> nToSample = getListOfNtoSample(annotationCompanionFile);
 
 		for (int n = nProtToSampleLowerBound; n <= nProtToSampleUpperBound; n++) { // range of proteins to sample
-			
+
 			/* determine if distribution should be computed for given number of proteins (n) */
 			if(nToSample.contains(n)) {
 				System.out.println("Computing TPD: " + n);
@@ -169,7 +169,7 @@ public class MotifSampling {
 
 		return nToSample;
 	}
-	
+
 	/**
 	 * Computes the distribution of TPD for certain amount of randomly selected proteins.
 	 *
@@ -227,10 +227,12 @@ public class MotifSampling {
 			case 2: tpdSampleList[i] = ClusteringMeasure.getCoreTPD(randomProteins, distanceMatrix, percentThreshold);
 			break;
 			case 3:
+			case 4:
 				List<Double> scores = getScoresForSelectedProteins(randomProteins);
 				tpdSampleList[i] = ClusteringMeasure.computeWNodeTPD(randomProteins, scores, distanceMatrix);
 				break;
 			}
+
 		}
 		System.out.print("Done\n");
 		return tpdSampleList;
@@ -303,7 +305,7 @@ public class MotifSampling {
 		}
 		return randomProteinsIdxList;
 	}
-	
+
 
 	private HashMap<String, List<Double>> getProteinScores(String annotationFile){
 
@@ -351,7 +353,7 @@ public class MotifSampling {
 		return scores;
 	}
 
-	
+
 	protected void printDistribution(String mcFile, HashMap<Double, Double> distribution, int n) {
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(new File(mcFile)));

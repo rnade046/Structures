@@ -88,6 +88,7 @@ public class MotifEnrichment {
 						case 2: tpd = ClusteringMeasure.getCoreTPD(indexOfProteinsInNetworkAnnotatedByMotif, distanceMatrix, percentThreshold);
 						break;
 						case 3:
+						case 4:
 							ArrayList<Double> scores = getScoresAssociatedToAnnotatedPRoteins(col[2].split("\\|"));
 							tpd = ClusteringMeasure.computeWNodeTPD(indexOfProteinsInNetworkAnnotatedByMotif, scores, distanceMatrix);
 							break;
