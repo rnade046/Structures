@@ -47,7 +47,7 @@ public class MotifSampling {
 		maxCumulativeWeight = cumulativeSumOfWeights[cumulativeSumOfWeights.length-1];
 		protsNotToSample = listProteinsNotToSample();
 
-		if(clustering_measure == 3) {
+		if(clustering_measure == 3 || clustering_measure == 4) {
 			proteinScoreMap = getProteinScores(annotationFreqFile);
 		}
 	}

@@ -116,7 +116,9 @@ public class Main {
 			String percentileAnnotationFile = wd + "ioFiles/" + networkType + "_percentileAnnotations.tsv";
 			String percentilesFile = wd + params.getProperty("percentilesFile");
 			
-			ScorePercentiles.assignScorePercentile(annotationFile, percentilesFile, annotationFile);
+			double threshold = 0.75;
+			
+			ScorePercentiles.assignScorePercentile(annotationFile, percentilesFile, annotationFile, threshold);
 			annotationFile = percentileAnnotationFile;
 		}
 
