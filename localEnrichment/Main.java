@@ -118,7 +118,7 @@ public class Main {
 			
 			double threshold = 0.75;
 			
-			ScorePercentiles.assignScorePercentile(annotationFile, percentilesFile, annotationFile, threshold);
+			ScorePercentiles.assignScorePercentile(annotationFile, percentilesFile, percentileAnnotationFile, threshold);
 			annotationFile = percentileAnnotationFile;
 		}
 
