@@ -27,13 +27,14 @@ public class GenerateAnnotationFile {
 		
 		double threshold = Double.parseDouble(args[1]);
 		String condition = args[2];
+		boolean shuffled = Boolean.parseBoolean(args[3]);
 		
 		String jsonIdxFile = "jsonIdxOfRefSeqIds_" + condition + ".tsv";
 		String refSeqIdFile = "corrNetTop2-400_proteinsInNetwork_info.tsv";
 		String annotationFile = "corrNetTop2-400_structureModules_" + condition + "_" + threshold + ".tsv";
 
 		/* determine mapping of protein - refSeqIds - .JSON files */ 
-		List<Protein> proteinList = determineProteinMapping(refSeqIdFile, jsonIdxFile, condition);
+		List<Protein> proteinList = determineProteinMapping(refSeqIdFile, jsonIdxFile, condition, shuffled);
 
 		System.out.println("searching modules");
 		for(Protein prot: proteinList) {
@@ -60,7 +61,7 @@ public class GenerateAnnotationFile {
 
 	}
 
-	public static List<Protein> determineProteinMapping(String refSeqToProteinFile, String refSeqToJSONFile, String condition) {
+	public static List<Protein> determineProteinMapping(String refSeqToProteinFile, String refSeqToJSONFile, String condition, boolean shuffled) {
 
 		List<Protein> proteinList = new ArrayList<>();
 
@@ -82,7 +83,7 @@ public class GenerateAnnotationFile {
 			Protein p = new Protein(entry.getKey());
 			
 			/* search refSeqIds */ 
-			if(condition.startsWith("rand")) {
+			if(shuffled) {
 				for(String id: entry.getValue()) {
 					p.updateJSONmapping(id + "_Shuffled", jsonIdxMap.get(id + "_Shuffled"));
 				}
