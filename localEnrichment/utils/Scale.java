@@ -23,6 +23,8 @@ public class Scale {
 			BufferedWriter out = new BufferedWriter(new FileWriter(new File(scaledAnnotationFile)));
 
 			String line = in.readLine(); // header 
+			out.write(line);
+			
 			line = in.readLine();
 
 			while(line != null) {

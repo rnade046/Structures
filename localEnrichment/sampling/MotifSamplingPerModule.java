@@ -32,7 +32,8 @@ public class MotifSamplingPerModule extends MotifSampling {
 			InputStream in = new FileInputStream(new File(annotationFile));
 			BufferedReader input = new BufferedReader(new InputStreamReader(in));
 
-			String line = input.readLine(); // no header
+			String line = input.readLine(); // header
+			line = input.readLine();
 
 			while(line!=null) {
 

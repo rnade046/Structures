@@ -107,18 +107,24 @@ public class Main {
 		/* scale scores */
 		if(clusteringMeasure == 3) {
 			String scaledAnnotationFile = wd + "ioFiles/" + networkType + "_scaledAnnotations.tsv";
-			
-			Scale.scaleScores(annotationFile, scaledAnnotationFile);
+			f = new File(scaledAnnotationFile);
+
+			if(!f.exists() && !f.isDirectory()) {
+				Scale.scaleScores(annotationFile, scaledAnnotationFile);
+			}
 			annotationFile = scaledAnnotationFile;
 		}
-		
+
 		if(clusteringMeasure == 4) {
 			String percentileAnnotationFile = wd + "ioFiles/" + networkType + "_percentileAnnotations.tsv";
 			String percentilesFile = wd + params.getProperty("percentilesFile");
-			
+
 			double threshold = 0.75;
+			f = new File(percentileAnnotationFile);
 			
-			ScorePercentiles.assignScorePercentile(annotationFile, percentilesFile, percentileAnnotationFile, threshold);
+			if(!f.exists() && !f.isDirectory()) {
+				ScorePercentiles.assignScorePercentile(annotationFile, percentilesFile, percentileAnnotationFile, threshold);
+			}
 			annotationFile = percentileAnnotationFile;
 		}
 
