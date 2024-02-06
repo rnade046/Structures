@@ -23,7 +23,7 @@ public class assessBayesPairingOutput {
 
 		String wd = args[0];
 		String condition = args[1];
-		boolean shuffled = Boolean. parseBoolean(args[2]);
+		boolean shuffled = Boolean.parseBoolean(args[2]);
 
 		String jsonIdxFile = "jsonIdxOfRefSeqIds_" + condition + ".tsv";
 		String refSeqIdFile = "corrNetTop2-400_proteinsInNetwork_info.tsv";
