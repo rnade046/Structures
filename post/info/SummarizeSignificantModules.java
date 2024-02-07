@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 public class SummarizeSignificantModules {
@@ -29,7 +30,7 @@ public class SummarizeSignificantModules {
 		
 		/* input files for protein information */
 		String annotationFile = wd + params.getProperty("annotationFile"); 
-		String proteinInfoFile = wd + "ioFiles/" + networkType + "_proteinsInNetwork_info.tsv";
+		String proteinInfoFile = wd + "i oFiles/" + networkType + "_proteinsInNetwork_info.tsv";
 		String jsonIdxFile = wd + args[1];
 		
 		double threshold = Double.parseDouble(args[2]); // 0.000902548470845385
@@ -37,7 +38,7 @@ public class SummarizeSignificantModules {
 		
 		/* load significant modules (clustering details file) */
 		HashMap<String, Module> modules = getSignificantModules(moduleDetailsFile, threshold);
-
+ 
 		/* get module info */
 		setModuleMetaData(moduleMetaFile, modules);
 		
@@ -194,7 +195,7 @@ public class SummarizeSignificantModules {
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(new File(outputFile)));
 			
-			out.write("Module\tType\tAtlasId\tAtlasPath\tPval\t#Prots\tProteinList\tRefSeqIds\tJSONpaths\n");
+			out.write("Module\tType\tAtlasId\tAtlasPath\tPval\t#Prots\tProteinList\n");
 			for(Module m: modules) {
 				
 				/* module meta data */
@@ -205,25 +206,12 @@ public class SummarizeSignificantModules {
 				/* protein names */
 				for(String protein : m.getProteins()) {
 					Protein p = proteinMap.get(protein);
-					out.write(p.getName() + "|");
-				}
-				out.write("\t");
-				
-				/* refSeqIDs */
-				for(String protein : m.getProteins()) {
-					Protein p = proteinMap.get(protein);
-					for(String id: p.getRefSeqIds()) {
-						out.write(id + "|");
+					out.write(p.getName() + "_[");
+					
+					for(Entry<String, String> e : p.getIds()) {
+						out.write(e.getKey() + "=" + e.getValue() + ",");
 					}
-				}
-				out.write("\t");
-				
-				/* JSON paths */
-				for(String protein : m.getProteins()) {
-					Protein p = proteinMap.get(protein);
-					for(String id: p.getJSONpaths()) {
-						out.write(id + "|");
-					}
+					out.write("]");
 				}
 				out.write("\n");
 				out.flush();

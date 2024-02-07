@@ -2,6 +2,7 @@ package info;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class Protein {
@@ -16,6 +17,10 @@ public class Protein {
 
 	public String getName() {
 		return this.name;
+	}
+	
+	public Set<Map.Entry<String, String>> getIds(){
+		return this.ids.entrySet();
 	}
 	
 	public Set<String> getRefSeqIds(){
