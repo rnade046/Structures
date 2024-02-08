@@ -34,12 +34,12 @@ public class MainFDR {
 		//		break;
 		//		}
 		//		
-		String motifs_significanceScoresFile = wd + "fdr/bp4/" + projectName + "_nwTPD_fwd_bp4_structure_significantScores.tsv";
-		String nullModel_significanceScoresFile = wd + "fdr/bp4/" + projectName  + "_nwTPD_rand1_bp4_structure_significantScores.tsv";
+		String motifs_significanceScoresFile = wd + "fdr/bp4_2/" + projectName + "_tpd_fwd_bp4_structure_significantScores.tsv";
+		String nullModel_significanceScoresFile = wd + "fdr/bp4_2/" + projectName  + "_tpd_rand1_bp4_2_struct_significantScores.tsv";
 
 		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-		String fdrOutput = wd + "fdr/" + sdf1.format(timestamp) + "_" + projectName + "_FDRatThresholds_monotonicTransformation.tsv";
+		String fdrOutput = wd + "fdr/bp4_2/" + sdf1.format(timestamp) + "_" + projectName + "_FDRatThresholds_monotonicTransformation.tsv";
 		//String significantMotifs = wd + pro
 
 		/* Get list of significance scores */
