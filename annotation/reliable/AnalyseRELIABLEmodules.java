@@ -17,10 +17,9 @@ public class AnalyseRELIABLEmodules {
 
 	public static void main(String[] args) {
 
-		String inputFile = "/Users/Rachel/Documents/rnabayespairing2-master/bayespairing/models/RELIABLE.json";
-		String outputFile = "/Users/Rachel/Modules/reliable-info2.tsv";
+		String inputFile = "/Users/rnadeau2/Documents/Structures/BayesPairs/RELIABLE/RELIABLE.json";
+		String outputFile = "/Users/rnadeau2/Documents/Structures/BayesPairs/RELIABLE/reliable-info2.tsv";
 		loadJson(inputFile, outputFile);
-		
 	}
 
 	public static void loadJson(String inputFile, String outputFile) {

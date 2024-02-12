@@ -11,7 +11,6 @@ public class Module {
 	private HashSet<String> proteinSet;
 	private String type;
 	private String atlasID;
-	private String atlasLink;
 	
 	public Module(String n, int nProts, double p) {
 		this.name = n;
@@ -24,10 +23,9 @@ public class Module {
 		return this.proteinSet;
 	}
 	
-	public void setMetaData(String aID, String t, String link) {
+	public void setMetaData(String aID, String t) {
 		this.atlasID = aID;
 		this.type = t;
-		this.atlasLink = link;
 	}
 	
 	public void setProteins(String[] proteins) {
@@ -45,7 +43,7 @@ public class Module {
 	}
 	
 	public String[] getModuleSummary() {
-		return new String[] {this.name, this.type, this.atlasID, this.atlasLink, 
+		return new String[] {this.name, this.type, this.atlasID,
 				String.valueOf(this.pval), String.valueOf(this.numberProteins)};
 	}
 }

@@ -22,7 +22,6 @@ public class GenerateAnnotationFile {
 	public static void main(String[] args) {
 
 		/* load protein list, but only modules with score that passes our set threshold */
-
 		String wd = args[0];
 		
 		double threshold = Double.parseDouble(args[1]);
@@ -33,6 +32,8 @@ public class GenerateAnnotationFile {
 		String refSeqIdFile = "corrNetTop2-400_proteinsInNetwork_info.tsv";
 		String annotationFile = "corrNetTop2-400_structureModules_" + condition + "_" + threshold + ".tsv";
 
+		String percentilesFile = "percentile-info-" + condition + ".tsv";
+		
 		/* determine mapping of protein - refSeqIds - .JSON files */ 
 		List<Protein> proteinList = determineProteinMapping(refSeqIdFile, jsonIdxFile, condition, shuffled);
 
@@ -58,6 +59,9 @@ public class GenerateAnnotationFile {
 		}
 		/* create annotation file */
 		generateAnnotationFile(proteinList, annotationFile);
+		
+		System.out.println("** determine score percentiles **");
+		CalculatePercentileRanks.determinePercentiles(proteinList, percentilesFile);
 
 	}
 

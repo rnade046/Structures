@@ -26,11 +26,11 @@ public class SummarizeSignificantModules {
 		
 		/* input file for module information */
 		String moduleDetailsFile = wd + networkType + "_structure_clusteringDetails.tsv";
-		String moduleMetaFile = "";
+		String moduleMetaFile = wd + "reliable-info2.tsv";
 		
 		/* input files for protein information */
 		String annotationFile = wd + params.getProperty("annotationFile"); 
-		String proteinInfoFile = wd + "i oFiles/" + networkType + "_proteinsInNetwork_info.tsv";
+		String proteinInfoFile = wd + "ioFiles/" + networkType + "_proteinsInNetwork_info.tsv";
 		String jsonIdxFile = wd + args[1];
 		
 		double threshold = Double.parseDouble(args[2]); // 0.000902548470845385
@@ -67,7 +67,8 @@ public class SummarizeSignificantModules {
 				String[] col = line.split("\t");
 
 				if(Double.parseDouble(col[3]) <= threshold) {
-					modules.put(col[0], new Module(col[0], Integer.parseInt(col[1]), Double.parseDouble(col[2])));
+					/* constructor = Module(String n, int nProts, double p) */
+					modules.put(col[0], new Module(col[0], Integer.parseInt(col[1]), Double.parseDouble(col[3])));
 				}
 				line = in.readLine();
 			}
@@ -84,14 +85,14 @@ public class SummarizeSignificantModules {
 		try {
 			BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(moduleMetaDataFile))));
 
-			String line = in.readLine();
+			String line = in.readLine(); // header
 			line = in.readLine();
 
 			while(line!=null) {
-				String[] col = line.split("\t"); // [1] = module, [2] = atlasID, [3] = link
+				String[] col = line.split("\t"); // [0] = module, [1] = atlasID
 				
-				if(modules.containsKey(col[1])) {
-					modules.get(col[1]).setMetaData(col[2], col[2].split("\\_")[0], col[3]);
+				if(modules.containsKey(col[0])) {
+					modules.get(col[0]).setMetaData(col[1], col[1].split("\\_")[0]);
 				}
 				line = in.readLine();
 			}
@@ -195,7 +196,7 @@ public class SummarizeSignificantModules {
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(new File(outputFile)));
 			
-			out.write("Module\tType\tAtlasId\tAtlasPath\tPval\t#Prots\tProteinList\n");
+			out.write("Module\tType\tAtlasId\tPval\t#Prots\tProteinList\n");
 			for(Module m: modules) {
 				
 				/* module meta data */
@@ -211,7 +212,7 @@ public class SummarizeSignificantModules {
 					for(Entry<String, String> e : p.getIds()) {
 						out.write(e.getKey() + "=" + e.getValue() + ",");
 					}
-					out.write("]");
+					out.write("]|");
 				}
 				out.write("\n");
 				out.flush();

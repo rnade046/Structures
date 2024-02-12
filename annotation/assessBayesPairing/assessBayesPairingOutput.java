@@ -49,14 +49,15 @@ public class assessBayesPairingOutput {
 		int fileNotFound = 0; 
 		for(Protein prot: proteinList) {
 			System.out.println(prot);
-
+			int count = 0;
 			for(String jsonFileSuffix :prot.getFileIdMap().keySet()) {
 
-				System.out.println(prot.getFileIdMap().get(jsonFileSuffix) + " - checked"); //
 				String jsonFile = wd + jsonFileSuffix;
-
+				
+				count++;
+				System.out.println(prot.getFileIdMap().get(jsonFileSuffix) + " - checked: " + count + "/" + jsonMapping.size()); //
 				System.out.println("jsonFileSuffix: " + jsonFileSuffix);
-
+				
 				if(jsonMapping.containsKey(jsonFileSuffix)) {
 					jsonMapping.get(jsonFileSuffix).setProtein(prot.getProteinName());
 				}
