@@ -80,7 +80,7 @@ public class assessFrequencyOfNucleotidesInModules {
 					}
 					/* update list with module sequence that had >score for the given protein */
 					if(!sequence.isBlank()) {
-						sequenceList.add(sequence); 
+						sequenceList.add(sequence + "_" + score); 
 						System.out.print("(" + score + ")");
 					}
 				}
@@ -167,7 +167,7 @@ public class assessFrequencyOfNucleotidesInModules {
 				case 'G':
 					pfm[2][i] += 1;
 					break;
-				case 'T':
+				case 'U':
 					pfm[3][i] += 1;
 					break;
 				}
@@ -207,7 +207,9 @@ public class assessFrequencyOfNucleotidesInModules {
 			BufferedWriter out = new BufferedWriter(new FileWriter(new File(outputFile)));
 
 			for(String motif: motifInstances) {
-				out.write(motif + "\n");
+				
+				String[] values = motif.split("\\_");
+				out.write(values[0] + "\t" + values[1] + "\n");
 				out.flush();
 			}
 

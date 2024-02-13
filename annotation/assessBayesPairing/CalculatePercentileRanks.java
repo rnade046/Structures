@@ -38,10 +38,7 @@ public class CalculatePercentileRanks {
 		for(Protein prot: proteinList) {
 
 			/* obtain scores for all modules */
-			List<Module> moduleList = prot.getModuleList();
-			for(Module mod : moduleList) {
-					scores.add(mod.getScore());
-			}
+			scores.addAll(prot.getAllScores());
 		}
 
 		/* sort scores in ascending order */

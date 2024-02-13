@@ -49,10 +49,10 @@ public class GenerateAnnotationFile {
 				File f = new File(jsonFile);
 				if(f.exists()) {
 					System.out.println(refSeq + " - checked");
-					prot.updateMultipleModules(loadJson(jsonFile, refSeq, threshold));
+					prot.updateMultipleModules(loadJson(jsonFile, refSeq), threshold);
 				} else {
 					System.out.println(refSeq + " - file not found");
-					prot.addMissedId(refSeq); // add missed ID to list
+					//prot.addMissedId(refSeq); // add missed ID to list
 				}
 			}
 			prot.summarizeModules();
@@ -144,7 +144,7 @@ public class GenerateAnnotationFile {
 		return jsonIdxMap;
 	}
 
-	public static List<Module> loadJson(String inputFile, String id, double threshold) {
+	public static List<Module> loadJson(String inputFile, String id) {
 
 		List<Module> modules = new ArrayList<>();
 
@@ -169,15 +169,15 @@ public class GenerateAnnotationFile {
 
 					/* each instance of a module */
 					JSONArray elements = m.getJSONArray(i);
-					String seq = elements.get(0).toString();
+					//String seq = elements.get(0).toString();
 					String[] pos = elements.get(1).toString().split("[,\\[\\]]");
 					String[] pos2 = Arrays.copyOfRange(pos, 2, pos.length);
 					double score = Double.parseDouble(elements.get(2).toString());
 
-					if(score > threshold) { // positive score
+					if(score > 0) { // positive score
 						if(!pos2[0].isEmpty()) {
 							if(Integer.parseInt(pos2[0]) > 100) { // ignore models in the CDS
-								modules.add(new Module(Integer.parseInt(k), seq, score, pos2));
+								modules.add(new Module(Integer.parseInt(k), score));
 							}	
 						}
 					}

@@ -7,6 +7,11 @@ public class Module {
 	double score;
 	String[] positions;
 	
+	public Module(int i, double s) {
+		id = i;
+		score = s;
+	}
+	
 	public Module(int i, String seq, double s, String[] p) {
 		id = i;
 		sequence = seq;

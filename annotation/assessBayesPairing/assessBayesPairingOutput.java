@@ -63,7 +63,7 @@ public class assessBayesPairingOutput {
 				}
 				File f = new File(jsonFile);
 				if(f.exists()) {
-					prot.updateMultipleModules(loadJson(jsonFile, prot.getFileIdMap().get(jsonFileSuffix)));
+					prot.updateMultipleModules(loadJson(jsonFile, prot.getFileIdMap().get(jsonFileSuffix)),0);
 
 					if(jsonMapping.containsKey(jsonFileSuffix)) {
 						jsonMapping.get(jsonFileSuffix).fileExists();

@@ -11,12 +11,14 @@ public class Protein {
 	private HashMap<String, String> jsonFileIdxMap; // fileID = refSeqId;
 	private HashSet<String> missedIDs;
 	private List<Module> moduleList;
+	private List<Double> allScores;
 	private HashMap<Integer, Double> moduleSummaryMap; // id = max score obtained
 
 	public Protein(String n) {
 		this.name = n;
 		this.jsonFileIdxMap = new HashMap<>();
 		this.moduleList = new ArrayList<>();
+		this.allScores = new ArrayList<>();
 		this.missedIDs = new HashSet<>();
 	}
 	
@@ -44,7 +46,18 @@ public class Protein {
 		this.moduleList.add(m);
 	}
 	
-	public void updateMultipleModules(List<Module> m) {
+	public void updateMultipleModules(List<Module> m, double threshold) {
+		
+		for(Module mod: m) {
+			/* add module that passes threshold to list */
+			if(mod.score > threshold) {
+				this.moduleList.add(mod);
+			} 
+			
+			/* add all score to list for percentile calculation */
+			this.allScores.add(mod.getScore());
+		}
+		
 		this.moduleList.addAll(m);
 	}
 	
@@ -75,5 +88,9 @@ public class Protein {
 	
 	public HashMap<Integer, Double> getModuleSummaryMap(){
 		return this.moduleSummaryMap;
+	}
+	
+	public List<Double> getAllScores(){
+		return this.allScores;
 	}
 }
