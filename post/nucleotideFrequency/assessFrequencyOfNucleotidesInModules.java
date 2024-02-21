@@ -55,7 +55,7 @@ public class assessFrequencyOfNucleotidesInModules {
 
 				for(String protein : info[5].split("\\|")) {
 
-					System.out.println(protein.split("\\",2)[0] + " : ");
+					System.out.println(protein.split("\\_",2)[0] + " : ");
 
 					String[] ids = protein.split("\\_",2)[1].substring(1, protein.split("\\_", 2)[1].length()-1).split(",");
 
@@ -85,7 +85,7 @@ public class assessFrequencyOfNucleotidesInModules {
 					}
 				}
 
-				double[][] ppm = calculatePPM(sequenceList, sequenceList.get(0).length());
+				double[][] ppm = calculatePPM(sequenceList, sequenceList.get(0).split("\\_")[0].length());
 
 				printPPM(ppm, modulePPMFilePrefix + module + ".tsv");
 				printMotifs(sequenceList, moduleSequencesFilePrefix + module + ".tsv");
@@ -156,8 +156,11 @@ public class assessFrequencyOfNucleotidesInModules {
 
 		/* compute position frequency matrix */
 		for(String motif: motifInstances) {
+			
+			String m = motif.split("\\_")[0];
+			
 			for(int i=0; i<motifLength; i++) {
-				switch(motif.charAt(i)) {
+				switch(m.charAt(i)) {
 				case 'A': 
 					pfm[0][i] += 1;
 					break;
