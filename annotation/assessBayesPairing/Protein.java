@@ -57,8 +57,6 @@ public class Protein {
 			/* add all score to list for percentile calculation */
 			this.allScores.add(mod.getScore());
 		}
-		
-		this.moduleList.addAll(m);
 	}
 	
 	public void addMissedId(String id) {

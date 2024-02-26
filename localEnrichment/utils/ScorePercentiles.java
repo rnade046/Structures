@@ -50,7 +50,10 @@ public class ScorePercentiles {
 
 						/* determine percentile */
 						double percentile = determineScorePercentile(Double.parseDouble(info[1]), percentileBounds);
-						System.out.println(info[0] + "_" + info[1] + " _" + percentile);
+						if(percentile == 0 ) {
+							System.out.println(info[0] + "_" + info[1] + " _" + percentile);
+						}
+						
 						out.write(info[0] + "_" + percentile + "|");
 					}
 					out.write("\n");
