@@ -60,7 +60,6 @@ public class Annotation {
 		}
 
 		/* count frequency of degrees */
-		int min = Collections.min(degrees);
 		int max = Collections.max(degrees);
 
 		try {

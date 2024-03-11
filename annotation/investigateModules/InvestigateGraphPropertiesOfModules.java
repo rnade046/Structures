@@ -30,7 +30,7 @@ public class InvestigateGraphPropertiesOfModules {
 
 		/* annotation file */
 		String annotationFile = wd + "Annotations/modules/annotations/corrNetTop2-400_structureModules_" + condition + "_" + threshold + ".tsv";
-		String annotationPercentileFile = wd + "Annotations/modules/annotations/corrNetTop2-400_percentileAnnotations_p0.75_"+ condition +"_" + threshold + ".tsv";
+		String annotationPercentileFile = wd + "Annotations/modules/annotations/corrNetTop2-400_percentileAnnotations_r0.88_"+ condition +"_" + threshold + ".tsv";
 
 		/* make directories */ 
 		Files.createDirectories(Paths.get(wd + "Annotations/modules/" + condition + "/"));
@@ -76,20 +76,17 @@ public class InvestigateGraphPropertiesOfModules {
 					System.out.println("Module: " + col[0]);
 					Annotation module = new Annotation(line1.split("\t")[2].split("\\|"), line2.split("\t")[2].split("\\|"));
 
-					if(col[0].equals("164")) {
-						System.out.println("hi");
-					}
-					if(module.getProteinList().size()>1) {
+					if(module.getProteinList().size()>1 && module.getProteinList().size() < 2000) {
 						/* output files */
-						Files.createDirectories(Paths.get(wd +"Annotations/modules/" + condition + "/m" + col[0] + "/"));
+						Files.createDirectories(Paths.get(wd +"Annotations/modules/bp4_" + condition + "/m" + col[0] + "/"));
 
-						String degreeDistributionFile = wd +"Annotations/modules/"+ condition + "/m" + col[0] + "/degreeDistribution_m" + col[0] + ".tsv";
-						String bpScoreDistributionFile = wd +"Annotations/modules/"+ condition + "/m" + col[0] + "/bpScoreDistribution_m" + col[0] + ".tsv";
-						String percentileDistributionFile = wd +"Annotations/modules/"+ condition + "/m" + col[0] + "/percentileDistribution_m" + col[0] + ".tsv";
+						String degreeDistributionFile = wd +"Annotations/modules/bp4_"+ condition + "/m" + col[0] + "/degreeDistribution_l2000_m" + col[0] + ".tsv";
+						String bpScoreDistributionFile = wd +"Annotations/modules/bp4_"+ condition + "/m" + col[0] + "/bpScoreDistribution_l2000_m" + col[0] + ".tsv";
+						String percentileDistributionFile = wd +"Annotations/modules/bp4_"+ condition + "/m" + col[0] + "/percentileDistribution_l2000_m" + col[0] + ".tsv";
 
-						String edgeWeightDistributionFile =  wd +"Annotations/modules/"+ condition + "/m" + col[0] + "/edgeWeightDistribution_m" + col[0] + ".tsv";
-						String shortestPathDistributionFile = wd +"Annotations/modules/"+ condition + "/m" + col[0] + "/shPathDistribution_m" + col[0] + ".tsv";
-						String nwShortestPathDistributionFile = wd +"Annotations/modules/"+ condition + "/m" + col[0] + "/nwShPathDistribution_m" + col[0] + ".tsv";
+						String edgeWeightDistributionFile =  wd +"Annotations/modules/bp4_"+ condition + "/m" + col[0] + "/edgeWeightDistribution_l2000_m" + col[0] + ".tsv";
+						String shortestPathDistributionFile = wd +"Annotations/modules/bp4_"+ condition + "/m" + col[0] + "/shPathDistribution_l2000_m" + col[0] + ".tsv";
+						String nwShortestPathDistributionFile = wd +"Annotations/modules/bp4_"+ condition + "/m" + col[0] + "/nwShPathDistribution_l2000_r0.88_m" + col[0] + ".tsv";
 
 						/* assess degree distribution */ 
 						module.assessDegreeDistribution(proteinMap, degreeDistributionFile);
@@ -131,7 +128,7 @@ public class InvestigateGraphPropertiesOfModules {
 								shortestPaths.add(shPath);
 
 								/* assess node weighted shortest path distribution */ 
-								double nodeAverage = ((percentiles.get(i)/100) + (percentiles.get(j)/100)) / (double) 2;
+								double nodeAverage = (percentiles.get(i) + percentiles.get(j)) / (double) 2;
 								nwShortestPaths.add(shPath / nodeAverage);
 							}
 						}
