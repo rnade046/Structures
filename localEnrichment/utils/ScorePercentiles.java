@@ -54,7 +54,7 @@ public class ScorePercentiles {
 							System.out.println(info[0] + "_" + info[1] + " _" + percentile);
 						}
 						
-						out.write(info[0] + "_" + percentile + "|");
+						out.write(info[0] + "_" + (percentile/100) + "|");
 					}
 					out.write("\n");
 					out.flush();

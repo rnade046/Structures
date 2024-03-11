@@ -116,10 +116,11 @@ public class Main {
 		}
 
 		if(clusteringMeasure == 4) {
-			String percentileAnnotationFile = wd + "ioFiles/" + networkType + "_percentileAnnotations.tsv";
+			double threshold = Double.parseDouble(params.getProperty("rescaleThreshold"));
+			
+			String percentileAnnotationFile = wd + "ioFiles/" + networkType + "_percentileAnnotations_r" + threshold + ".tsv";
 			String percentilesFile = wd + params.getProperty("percentilesFile");
-
-			double threshold = 0.75;
+			
 			f = new File(percentileAnnotationFile);
 			
 			if(!f.exists() && !f.isDirectory()) {
