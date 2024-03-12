@@ -7,7 +7,12 @@
 	<classpathentry kind="src" path="localEnrichment"/>
 	<classpathentry kind="src" path="post"/>
 	<classpathentry kind="src" path="fdr"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="randomizeSeq"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="commons-math3-3.6.1.jar"/>
 	<classpathentry kind="lib" path="json-20230227.jar"/>
 	<classpathentry kind="output" path="bin"/>
