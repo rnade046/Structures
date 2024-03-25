@@ -21,18 +21,23 @@ public class MotifEnrichment {
 	private double[][] distanceMatrix;
 	private HashMap<String, Integer> indexOfProteinsInNetwork;
 	private HashMap<Integer, double[]> normalDistributionParams;
+	private boolean useNormalDistribution;
 	private int lowerBound;
 	private int upperBound;
 	private int clusteringMeasure;
 	private double percentThreshold;
 
 	public MotifEnrichment(double[][] _distance_matrix, ArrayList<Protein> proteinsInNetwork, String normalDistributionParamsFile, 
-			int _lowerBound, int _upperBound, int clustering_measure, double percent_threshold) {
+			int _lowerBound, int _upperBound, int clustering_measure, double percent_threshold, boolean useNDist) {
 
 		this.distanceMatrix = _distance_matrix;
 		this.indexOfProteinsInNetwork = getIndexOfProteins(proteinsInNetwork);
-
-		this.normalDistributionParams = loadNormalDistributionParams(normalDistributionParamsFile);
+		
+		this.useNormalDistribution = useNDist;
+		if(useNDist) {
+			this.normalDistributionParams = loadNormalDistributionParams(normalDistributionParamsFile);
+		}
+		
 		this.lowerBound = _lowerBound;
 		this.upperBound = _upperBound;
 
@@ -40,8 +45,7 @@ public class MotifEnrichment {
 		this.percentThreshold = percent_threshold;
 	}
 
-	public void testMotifClustering(String annotationFile, String annotationCompanionFile,String annotationOutputFile, int currentLowerBoundToTest, int currentUpperBoundToTest, int samplingMethod) {
-
+	public void testMotifClustering(String annotationFile, String annotationCompanionFile,String annotationOutputFile, int currentLowerBoundToTest, int currentUpperBoundToTest, String mcDistPrefix) {
 
 		/* Load annotations 1 line at a time; 
 		 * 1st check: if num of proteins >= 3 or <= 2000
@@ -94,23 +98,30 @@ public class MotifEnrichment {
 							break;
 						}
 
-						/* assess clustering significance */
-						double[] params;
+						int idx = 0;
 						
-						if(samplingMethod == 0) {
-							params = normalDistributionParams.get(proteinInNetworkAssociatedToMotif.size());
-						} else { 
-							params = normalDistributionParams.get(Integer.parseInt(col[0]));
+						switch(clusteringMeasure) {
+						case 0:
+						case 1:
+						case 2: 
+							idx = proteinInNetworkAssociatedToMotif.size();
+							break;
+						case 3:
+						case 4:
+							idx = Integer.parseInt(col[0]);
+							break;
 						}
-						NormalDistribution nd = new NormalDistribution(params[0], params[1]);
-
-						double p_val = nd.probability(0, tpd);
-
+						
+						double p_val = 1.0;
+						if(this.useNormalDistribution) {
+							p_val = determinePvalueFromNormalDistribution(tpd, idx);
+						} else {
+							p_val = MotifEnrichmentFromMCdist.getPvaluesFromMonteCarloDistribution(mcDistPrefix + "_n" + idx, tpd);
+						}
 						/* print motif; numProts; listProteins; tpd; p-val */
 						printAnnotationDetails(annotationOutputFile, col[0], proteinInNetworkAssociatedToMotif.size(), tpd, p_val);
 					}
 				}
-
 				line = input.readLine();
 				motifCount++;
 			}
@@ -260,5 +271,15 @@ public class MotifEnrichment {
 			e.printStackTrace();
 		}
 		return motifSet;
+	}
+	
+	private double determinePvalueFromNormalDistribution(double tpd, int idx) {
+		/* assess clustering significance */
+		double[] params = normalDistributionParams.get(idx);
+
+		NormalDistribution nd = new NormalDistribution(params[0], params[1]);
+		double p_val = nd.probability(0, tpd);
+		
+		return p_val;
 	}
 }

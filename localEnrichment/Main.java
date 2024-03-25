@@ -162,7 +162,8 @@ public class Main {
 			}
 		}
 
-		if(Boolean.parseBoolean(params.getProperty("calculateNormalDistributionParams"))) {
+		boolean ndist = Boolean.parseBoolean(params.getProperty("useNormalDistribution"));
+		if(Boolean.parseBoolean(params.getProperty("calculateNormalDistributionParams")) && ndist) {
 			if(Integer.parseInt(params.getProperty("samplingMethod"))==0) {
 				ApproximateNormalDistribuiton.getNormalDistributionParams(mcSamplingPrefix, lowerBound, upperBound, numOfSamplings, normalDistributionParamsFile);
 			} else { 
@@ -173,8 +174,15 @@ public class Main {
 		/* Load and test significance annotations */
 		if(Boolean.parseBoolean(params.getProperty("testMotifs"))) {
 			System.out.println("**Assessing motif clustering**");
-			MotifEnrichment m = new MotifEnrichment(distanceMatrix, proteinList2, normalDistributionParamsFile, lowerBound, upperBound,  clusteringMeasure, clusteringThreshold);
-			m.testMotifClustering(annotationFile, annotationCompanionFile, annotationOutputFile, Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(params.getProperty("samplingMethod")));
+			
+			if(ndist) {
+				System.out.println("Calculating significance from normal distributions");
+			} else {
+				System.out.println("Calculating significance from monte carlo sampling distributions");
+			}
+			
+			MotifEnrichment m = new MotifEnrichment(distanceMatrix, proteinList2, normalDistributionParamsFile, lowerBound, upperBound,  clusteringMeasure, clusteringThreshold, ndist);
+			m.testMotifClustering(annotationFile, annotationCompanionFile, annotationOutputFile, Integer.parseInt(args[1]), Integer.parseInt(args[2]), mcSamplingPrefix + "s" + numOfSamplings);
 		}
 
 		/* Look at the overall distribution of significance scores once all annotations have been tested */

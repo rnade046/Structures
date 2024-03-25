@@ -72,7 +72,7 @@ public class ApproximateNormalDistribuiton {
 	 * @param mcDistributionFile	String - file path for distributions 
 	 * @param distributionMap		HashMap<Double, Double> - map of tpd = freq
 	 */
-	private static HashMap<Double, Double> loadMonteCarloDistributions(String mcDistributionFile) {
+	public static HashMap<Double, Double> loadMonteCarloDistributions(String mcDistributionFile) {
 
 		/* Store distribution information for nProt in a hash map */
 		HashMap<Double, Double> distributionMap = new HashMap<Double, Double>(); 
