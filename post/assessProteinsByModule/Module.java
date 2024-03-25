@@ -14,6 +14,12 @@ public class Module {
 		this.proteinSet = new HashSet<>();
 	}
 	
+	public Module(String n, HashSet<String> prots) {
+		this.name = n;
+		this.proteinSet = prots;
+		this.numberProteins = prots.size();
+	}
+	
 	public String getProteinName() {
 		return this.name;
 	}

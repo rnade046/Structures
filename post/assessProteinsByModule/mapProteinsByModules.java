@@ -14,13 +14,14 @@ public class mapProteinsByModules {
 
 	public static void main(String[] args) {
 
-		String modulesDetailsFile = "/Users/rnadeau2/Documents/Structures/enrichmentAnalysis/fdr/bp4/corrNetTop2-400_nwTPD_fwd_bp4_structure_clusteringDetails.tsv";
-		String annotationFile = "/Users/rnadeau2/Documents/Structures/enrichmentAnalysis/inputFiles/corrNetTop2-400_structureModules_fwd_4.0.tsv";
+		String modulesDetailsFile = "/Users/rnadeau2/Documents/Structures/enrichmentAnalysis/fdr/bp4_seq/corrNet2-400_nwTPD2_rand1Seq_struct_bp4_clusteringDetails.tsv";
+		String annotationFile = "/Users/rnadeau2/Documents/Structures/Annotations/modules/annotations/corrNetTop2-400_structureModules_seqRand1_4.0.tsv";
 
-		String outputFile = "/Users/rnadeau2/Documents/Structures/nwTPD/corrNet2-400_bp4.0_proteinsByModule.tsv";
-
+		String outputFile = "/Users/rnadeau2/Documents/Structures/Annotations/modules/membership/corrNet2-400_seqRand1_bp4_proteinsByModule.tsv";
+		double threshold = 1.0;
+		
 		/* Get list of significant motifs */
-		HashMap<String, Module> modules = getSignificantModules(modulesDetailsFile, 0.000902548470845385);
+		HashMap<String, Module> modules = getSignificantModules(modulesDetailsFile, threshold);
 
 		/* Parse annotation file for protein information */
 		setProteins(annotationFile, modules);
