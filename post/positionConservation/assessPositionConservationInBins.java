@@ -11,24 +11,23 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Properties;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class assessPositionConservationInBins {
 
-	private static int bins = 100;
-	
+	private static int bins = 50;
+
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 
-		Properties params = new Properties();
-		params.load(new FileInputStream(args[0]));	
+		//Properties params = new Properties();
+		//params.load(new FileInputStream(args[0]));	
 
-		String wd = params.getProperty("working_directory");
+		//String wd = params.getProperty("working_directory");
+		String wd = args[0];
 		String jsonPath = args[1];
-
-		String significantModulesFile = wd + "significantModules_summary.tsv";
+		String significantModulesFile = wd + args[2];
 
 		Files.createDirectories(Paths.get(wd + "positionCons/"));
 		String positionConservationFilePrefix = wd + "positionCons/positionConservation_m";
@@ -61,8 +60,8 @@ public class assessPositionConservationInBins {
 						String[] ids = protein.split("\\_",2)[1].substring(1, protein.split("\\_", 2)[1].length()-1).split(",");
 
 						Double score = 0.0;
-						Integer seqLength = 0;
-						Integer[] positions = null;
+						int seqLength = 0;
+						int[] positions = null;
 						String finalIdentifiers = "";
 
 						for(String i: ids) { // refSeqId=jsonPath
@@ -75,13 +74,13 @@ public class assessPositionConservationInBins {
 								if(f.exists()) {
 
 									/* obtain information for current refSeqId*/
-									Object[] values = searchJsonForMaxModuleScore(jsonPath + identifiers[1], identifiers[0], module, score);
+									Module mod = searchJsonForMaxModuleScore(jsonPath + identifiers[1], identifiers[0], module, score);
 
 									/* update information if values array is not empty (i.e. corresponds to modules with > score) */
-									if(values[0] != null) {
-										score = Double.parseDouble(values[0].toString());
-										positions = (Integer[]) values[1];
-										seqLength = Integer.parseInt(values[2].toString()) - 100;  // Subtract 100 CDS
+									if(mod != null) {
+										score = mod.getScore();
+										positions = mod.getPositions();
+										seqLength = mod.getSeqLength() - 100;  // Subtract 100 CDS
 										finalIdentifiers = identifiers[0];
 									}
 								} 
@@ -89,12 +88,14 @@ public class assessPositionConservationInBins {
 						} 
 
 						/* determine position of current module */
-						if(positions.length>0) {
+						if(positions != null) {
 							System.out.println(finalIdentifiers + " | score: " + score);
-							
-							int[][] binnedPositions = formatSequenceInBins(seqLength);
-							motifPositions = increasePositionCount(positions, binnedPositions, motifPositions);
-							consideredSequence = updateConsideredSequencesForNormalization(positions, binnedPositions, consideredSequence);
+
+//							if(Math.floor(seqLength / bins) >= motifPositions.length) {
+								int[][] binnedPositions = formatSequenceInBins(seqLength);
+								motifPositions = increasePositionCount(positions, binnedPositions, motifPositions);
+								consideredSequence = updateConsideredSequencesForNormalization(positions, binnedPositions, consideredSequence);
+//							} 
 						}
 					}
 					/* normalize positions */
@@ -110,21 +111,21 @@ public class assessPositionConservationInBins {
 		}
 	}
 
-	public static Object[] searchJsonForMaxModuleScore(String inputFile, String id, String module, Double maxScore) {
+	public static Module searchJsonForMaxModuleScore(String inputFile, String id, String module, Double maxScore) {
 
-		Object[] r = new Object[3];
-
+		Module mod = null;
 		try {
 			BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(inputFile))));
 
 			String line = in.readLine();
 
 			JSONObject rootObject = new JSONObject(line); // Parse the JSON to a JSONObject
+			int seqLength = rootObject.getJSONArray("input").get(0).toString().length();
 
 			if(rootObject.getJSONObject("all_hits").has(id)){
 
 				JSONObject a = rootObject.getJSONObject("all_hits").getJSONObject(id); // {270}
-				System.out.print(id + ": ");
+				//				System.out.print(id + ": ");
 
 				if(a.has(module)) {
 
@@ -133,7 +134,7 @@ public class assessPositionConservationInBins {
 
 						/* each instance of a module */
 						JSONArray elements = m.getJSONArray(i);
-						String seq = elements.get(0).toString();
+						//String seq = elements.get(0).toString();
 						String[] pos = elements.get(1).toString().split("[,\\[\\]]");
 						String[] pos2 = Arrays.copyOfRange(pos, 2, pos.length);
 						double score = Double.parseDouble(elements.get(2).toString());
@@ -143,15 +144,7 @@ public class assessPositionConservationInBins {
 								if(Integer.parseInt(pos2[0]) > 100) { // ignore models in the CDS
 
 									if(score > maxScore) {
-										r[0] = score;
-										
-										int[] pos3 = new int[pos2.length];
-										for(int j=0; j<pos2.length; j++) {
-											pos3[j] = Integer.parseInt(pos2[j]);
-										}
-										r[1] = pos3;
-										r[2] = seq.length();
-
+										mod = new Module(seqLength, score, pos2);
 									}	
 								}
 							}
@@ -163,9 +156,9 @@ public class assessPositionConservationInBins {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return r;
+		return mod;
 	}
-	
+
 	private static int[][] formatSequenceInBins(int seqLength) {
 
 		int[][] sequenceBins = new int[bins][2];
@@ -203,36 +196,41 @@ public class assessPositionConservationInBins {
 		/* bin positions (0 = start position, 1 = end position) */
 		int currentIdx = 100;
 		for(int i=0; i<bins; i++) {
-			
+
 			sequenceBins[i][0] = currentIdx; // start
 			sequenceBins[i][1] = currentIdx + binSizesReodered[i]; // end
 			currentIdx += binSizesReodered[i];
 		}
 		return sequenceBins;
 	}
-	
-	private static int[] increasePositionCount(Integer[] positions, int[][] binnedPositions, int[] motifPositions) { 
+
+	private static int[] increasePositionCount(int[] positions, int[][] binnedPositions, int[] motifPositions) { 
+
+		boolean motifFound = false;
 
 		/* iterate over each bin */
 		for(int bin=0; bin<binnedPositions.length; bin++) {
 
 			int start = binnedPositions[bin][0];
 			int end = binnedPositions[bin][1];
-			
-			if(positions[0] >= start && positions[positions.length] <= end) {
+
+			if(positions[0] >= start && positions[positions.length-1] <= end) {
 				motifPositions[bin] += 1;
+				motifFound = true;
 				break;  // stop search
-			} else { 
-				System.out.println("module accross multiple bins");
-			}
+			} 
+		}
+
+		if(!motifFound) { 
+			System.out.println("module accross multiple bins");
 		}
 		return motifPositions;
 	}
-	
-	private static int[] updateConsideredSequencesForNormalization(Integer[] positions, int[][] binnedPositions, int[] consideredSequences){
+
+	private static int[] updateConsideredSequencesForNormalization(int[] positions, int[][] binnedPositions, int[] consideredSequences){
 
 		/* iterate over each bin */
-		for(int bin=0; bin<positions.length; bin++) {
+		for(int bin=0; bin<binnedPositions.length; bin++) {
 
 			/* determine number of motifs tested for each subsequence (i.e. bins)  */
 			int currentLength = (binnedPositions[bin][1] - binnedPositions[bin][0]) - positions.length + 1;
@@ -240,7 +238,7 @@ public class assessPositionConservationInBins {
 		}
 		return consideredSequences;
 	}
-	
+
 	private static double[] normalizePositionsByConsideredPositions(int[] motifPositions, int[] consideredSeq, double[] normalizedPositions) {
 
 		for(int bin=0; bin<normalizedPositions.length; bin++) {
@@ -248,7 +246,7 @@ public class assessPositionConservationInBins {
 		}
 		return normalizedPositions;
 	}
-	
+
 	private static void printNormalizedMotifPosition(double[] normalizedPositions, String outputFile) {
 
 		try {
