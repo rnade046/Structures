@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashSet;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -49,9 +50,9 @@ public class assessPositionConservationInBins {
 					System.out.println("testing module: " + module + " | #prots : " + info[4]);
 
 					/* initialize motif positions list and considered sequences for normalization */
-					int[] motifPositions = new int[bins];
-					int[] consideredSequence = new int[bins];
-					double[] normalizedPositions = new double[bins];
+					double[] motifPositions = new double[bins];
+//					int[] consideredSequence = new int[bins];
+//					double[] normalizedPositions = new double[bins];
 
 					for(String protein : info[5].split("\\|")) {
 
@@ -94,13 +95,13 @@ public class assessPositionConservationInBins {
 //							if(Math.floor(seqLength / bins) >= motifPositions.length) {
 								int[][] binnedPositions = formatSequenceInBins(seqLength);
 								motifPositions = increasePositionCount(positions, binnedPositions, motifPositions);
-								consideredSequence = updateConsideredSequencesForNormalization(positions, binnedPositions, consideredSequence);
+//								consideredSequence = updateConsideredSequencesForNormalization(positions, binnedPositions, consideredSequence);
 //							} 
 						}
 					}
 					/* normalize positions */
-					normalizedPositions = normalizePositionsByConsideredPositions(motifPositions, consideredSequence, normalizedPositions);
-					printNormalizedMotifPosition(normalizedPositions, positionConservationFilePrefix + module + ".tsv");
+					//normalizedPositions = normalizePositionsByConsideredPositions(motifPositions, consideredSequence, normalizedPositions);
+					printMotifPosition(motifPositions, positionConservationFilePrefix + module + ".tsv");
 				}
 				System.out.println();
 				line = in.readLine();
@@ -204,29 +205,43 @@ public class assessPositionConservationInBins {
 		return sequenceBins;
 	}
 
-	private static int[] increasePositionCount(int[] positions, int[][] binnedPositions, int[] motifPositions) { 
+	private static double[] increasePositionCount(int[] positions, int[][] binnedPositions, double[] motifPositions) { 
 
 		boolean motifFound = false;
+		int[] bins = new int[positions.length];
+		
+		/* find corresponding bin for each nucleotide */
+		for(int pos=0; pos<positions.length; pos++) {
+			
+			for(int bin=0; bin<binnedPositions.length; bin++) {
 
-		/* iterate over each bin */
-		for(int bin=0; bin<binnedPositions.length; bin++) {
+				int start = binnedPositions[bin][0];
+				int end = binnedPositions[bin][1];
 
-			int start = binnedPositions[bin][0];
-			int end = binnedPositions[bin][1];
-
-			if(positions[0] >= start && positions[positions.length-1] <= end) {
-				motifPositions[bin] += 1;
-				motifFound = true;
-				break;  // stop search
-			} 
+				if(positions[pos] >= start && positions[positions.length-1] <= end) {
+					bins[pos] = bin;
+					break;
+				} 
+			}	
 		}
-
+		
+		/* assess count of bin positions */
+		HashSet<Integer> binSet = new HashSet<>();
+		for(int i=0; i<bins.length; i++) {
+			binSet.add(bins[i]);
+		}
+ 		
+		/* increase motif positions*/
+		for(Integer b: binSet) {
+			motifPositions[b] += 1 / (double) binSet.size();
+		}
 		if(!motifFound) { 
 			System.out.println("module accross multiple bins");
 		}
 		return motifPositions;
 	}
 
+	@SuppressWarnings("unused")
 	private static int[] updateConsideredSequencesForNormalization(int[] positions, int[][] binnedPositions, int[] consideredSequences){
 
 		/* iterate over each bin */
@@ -239,6 +254,7 @@ public class assessPositionConservationInBins {
 		return consideredSequences;
 	}
 
+	@SuppressWarnings("unused")
 	private static double[] normalizePositionsByConsideredPositions(int[] motifPositions, int[] consideredSeq, double[] normalizedPositions) {
 
 		for(int bin=0; bin<normalizedPositions.length; bin++) {
@@ -247,7 +263,7 @@ public class assessPositionConservationInBins {
 		return normalizedPositions;
 	}
 
-	private static void printNormalizedMotifPosition(double[] normalizedPositions, String outputFile) {
+	private static void printMotifPosition(double[] normalizedPositions, String outputFile) {
 
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(new File(outputFile)));
