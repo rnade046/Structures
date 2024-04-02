@@ -46,7 +46,6 @@ public class assessPositionConservationInBins {
 				String[] info = line.split("\t");
 				String module = info[0];
 
-				if(info[1].equals("HL")) {
 					System.out.println("testing module: " + module + " | #prots : " + info[4]);
 
 					/* initialize motif positions list and considered sequences for normalization */
@@ -105,7 +104,6 @@ public class assessPositionConservationInBins {
 				}
 				System.out.println();
 				line = in.readLine();
-			}
 			in.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -207,7 +205,6 @@ public class assessPositionConservationInBins {
 
 	private static double[] increasePositionCount(int[] positions, int[][] binnedPositions, double[] motifPositions) { 
 
-		boolean motifFound = false;
 		int[] bins = new int[positions.length];
 		
 		/* find corresponding bin for each nucleotide */
@@ -235,7 +232,7 @@ public class assessPositionConservationInBins {
 		for(Integer b: binSet) {
 			motifPositions[b] += 1 / (double) binSet.size();
 		}
-		if(!motifFound) { 
+		if(binSet.size() > 1) { 
 			System.out.println("module accross multiple bins");
 		}
 		return motifPositions;
