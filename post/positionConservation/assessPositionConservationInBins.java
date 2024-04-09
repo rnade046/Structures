@@ -16,7 +16,7 @@ import java.util.HashSet;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class assessPositionConservationInBins {
+public class AssessPositionConservationInBins {
 
 	private static int bins = 50;
 
@@ -143,7 +143,7 @@ public class assessPositionConservationInBins {
 								if(Integer.parseInt(pos2[0]) > 100) { // ignore models in the CDS
 
 									if(score > maxScore) {
-										mod = new Module(seqLength, score, pos2);
+										mod = new Module(seqLength, score, pos2, true);
 									}	
 								}
 							}

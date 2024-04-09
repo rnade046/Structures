@@ -45,20 +45,19 @@ public class AssessPositionConservationByBasePair {
 
 					/* initialize motif positions list and considered sequences for normalization */
 					Segment cds = new Segment(100);
-					Segment start = new Segment(100);
-					Segment end = new Segment(100);
+					Segment utr = new Segment(11900);
 					
 					for(String protein : info[5].split("\\|")) {
 
 						System.out.println(protein.split("\\_",2)[0] + " : ");
 
 						String[] ids = protein.split("\\_",2)[1].substring(1, protein.split("\\_", 2)[1].length()-1).split(",");
+						
+						Module cdsMod = new Module(0, 0.0, new String[2], false);
+						Module utrMod = new Module(0, 0.0, new String[2], true);
 
-						Double score = 0.0;
-						int seqLength = 0;
-						int[] positions = null;
-						String finalIdentifiers = "";
-
+						String utrFinalIdentifiers = "";
+						String cdsFinalIdentifiers = "";
 						for(String i: ids) { // refSeqId=jsonPath
 
 							String[] identifiers = i.split("=");
@@ -69,33 +68,41 @@ public class AssessPositionConservationByBasePair {
 								if(f.exists()) {
 
 									/* obtain information for current refSeqId*/
-									Module mod = searchJsonForMaxModuleScore(jsonPath + identifiers[1], identifiers[0], module, score);
-
+									Module utrCurrentMod = searchJsonForMaxModuleScoreInUTR(jsonPath + identifiers[1], identifiers[0], module, utrMod.getScore());
+									Module cdsCurrentMod = searchJsonForMaxModuleScoreInCDS(jsonPath + identifiers[1], identifiers[0], module, cdsMod.getScore());
+									
 									/* update information if values array is not empty (i.e. corresponds to modules with > score) */
-									if(mod != null) {
-										score = mod.getScore();
-										positions = mod.getPositions();
-										seqLength = mod.getSeqLength() - 100;  // Subtract 100 CDS
-										finalIdentifiers = identifiers[0];
+									if(utrCurrentMod != null) {
+										utrMod = utrCurrentMod;
+										utrFinalIdentifiers = identifiers[0];
+									}
+									
+									if(cdsCurrentMod != null) {
+										cdsMod = cdsCurrentMod;
+										cdsFinalIdentifiers = identifiers[0];
 									}
 								} 
 							}
 						} 
 
 						/* determine position of current module */
-						if(positions != null) {
-							System.out.println(finalIdentifiers + " | score: " + score);
-
-//							if(Math.floor(seqLength / bins) >= motifPositions.length) {
-								int[][] binnedPositions = formatSequenceInBins(seqLength);
-								motifPositions = increasePositionCount(positions, binnedPositions, motifPositions);
-								consideredSequence = updateConsideredSequencesForNormalization(positions, binnedPositions, consideredSequence);
-//							} 
+						if(utrMod.getPositions() != null) {
+							System.out.println(utrFinalIdentifiers + " | score: " + utrMod.getScore());
+							utr.utrIncreasePositionCount(utrMod);
+						}
+						
+						if(cdsMod.getPositions() != null) {
+							System.out.println(cdsFinalIdentifiers + " | score: " + cdsMod.getScore());
+							cds.cdsIncreasePositionCount(utrMod);
 						}
 					}
 					/* normalize positions */
-					normalizedPositions = normalizePositionsByConsideredPositions(motifPositions, consideredSequence, normalizedPositions);
-					printNormalizedMotifPosition(normalizedPositions, positionConservationFilePrefix + module + ".tsv");
+					cds.normalizePositionsByConsideredPositions();
+					utr.normalizePositionsByConsideredPositions();
+					
+					/* print motif positions */
+					cds.printMotifPosition(positionConservationFilePrefix + module + "_cds.tsv");
+					utr.printMotifPosition(positionConservationFilePrefix + module + "_utr.tsv");
 				
 				System.out.println();
 				line = in.readLine();
@@ -106,7 +113,7 @@ public class AssessPositionConservationByBasePair {
 		}
 	}
 
-	public static Module searchJsonForMaxModuleScore(String inputFile, String id, String module, Double maxScore) {
+	public static Module searchJsonForMaxModuleScoreInUTR(String inputFile, String id, String module, Double maxScore) {
 
 		Module mod = null;
 		try {
@@ -139,7 +146,7 @@ public class AssessPositionConservationByBasePair {
 								if(Integer.parseInt(pos2[0]) > 100) { // ignore models in the CDS
 
 									if(score > maxScore) {
-										mod = new Module(seqLength, score, pos2);
+										mod = new Module(seqLength-100, score, pos2, true);
 									}	
 								}
 							}
@@ -154,4 +161,53 @@ public class AssessPositionConservationByBasePair {
 		return mod;
 	}
 	
+	public static Module searchJsonForMaxModuleScoreInCDS(String inputFile, String id, String module, Double maxScore) {
+
+		Module mod = null;
+		try {
+			BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(inputFile))));
+
+			String line = in.readLine();
+
+			JSONObject rootObject = new JSONObject(line); // Parse the JSON to a JSONObject
+			//int seqLength = rootObject.getJSONArray("input").get(0).toString().length();
+
+			if(rootObject.getJSONObject("all_hits").has(id)){
+
+				JSONObject a = rootObject.getJSONObject("all_hits").getJSONObject(id); // {270}
+				//				System.out.print(id + ": ");
+
+				if(a.has(module)) {
+
+					JSONArray m = a.getJSONArray(module); 
+					for(int i=0; i < m.length(); i++) {
+
+						/* each instance of a module */
+						JSONArray elements = m.getJSONArray(i);
+						//String seq = elements.get(0).toString();
+						String[] pos = elements.get(1).toString().split("[,\\[\\]]");
+						String[] pos2 = Arrays.copyOfRange(pos, 2, pos.length);
+						double score = Double.parseDouble(elements.get(2).toString());
+
+						if(score > 4) { // positive score
+							if(!pos2[0].isEmpty()) {
+								if(Integer.parseInt(pos2[0]) < 100) { // ignore models in the CDS
+
+									if(score > maxScore) {
+										mod = new Module(100, score, pos2, false);
+									}	
+								}
+							}
+						}
+					}
+				}
+			}
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return mod;
+	}
+	
+
 }

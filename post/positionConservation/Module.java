@@ -2,14 +2,21 @@ package positionConservation;
 
 public class Module {
 
-	int seqLength;
-	double score;
-	int[] positions;
+	private int seqLength;
+	private double score;
+	private int[] positions;
+	private String identifiers;
 	
-	public Module(int sLength, double s, String[] p) {
-		seqLength = sLength;
-		score = s;
-		positions = setPositions(p);
+	public Module(int sLength, double s, String[] p, boolean utr) {
+		this.seqLength = sLength;
+		this.score = s;
+		
+		if(utr) {
+			this.positions = setUTRPositions(p);
+		} else {
+			this.positions = setPositions(p);
+		}
+		
 	}
 
 	public int getSeqLength() {
@@ -24,12 +31,31 @@ public class Module {
 		return this.positions;
 	}
 	
+	public void setIdentifiers(String id) {
+		this.identifiers = id;
+	}
+	
+	public String getIdentifiers() {
+		return this.identifiers;
+	}
+	
 	private int[] setPositions(String[] p) {
 		
 		int[] pos3 = new int[p.length];
 		
 		for(int j=0; j<p.length; j++) {
 			pos3[j] = Integer.parseInt(p[j]);
+		}
+		
+		return pos3;
+	}
+	
+	private int[] setUTRPositions(String[] p) {
+		
+		int[] pos3 = new int[p.length];
+		
+		for(int j=0; j<p.length; j++) {
+			pos3[j] = Integer.parseInt(p[j]) -100;
 		}
 		
 		return pos3;
