@@ -53,8 +53,8 @@ public class AssessPositionConservationByBasePair {
 
 						String[] ids = protein.split("\\_",2)[1].substring(1, protein.split("\\_", 2)[1].length()-1).split(",");
 						
-						Module cdsMod = new Module(0, 0.0, new String[2], false);
-						Module utrMod = new Module(0, 0.0, new String[2], true);
+						Module cdsMod = new Module(0, 0.0);
+						Module utrMod = new Module(0, 0.0);
 
 						String utrFinalIdentifiers = "";
 						String cdsFinalIdentifiers = "";
@@ -86,14 +86,14 @@ public class AssessPositionConservationByBasePair {
 						} 
 
 						/* determine position of current module */
-						if(utrMod.getPositions() != null) {
-							System.out.println(utrFinalIdentifiers + " | score: " + utrMod.getScore());
+						if(utrMod.getScore() > 0) {
+							System.out.println("utr > " + utrFinalIdentifiers + " | score: " + utrMod.getScore());
 							utr.utrIncreasePositionCount(utrMod);
 						}
 						
-						if(cdsMod.getPositions() != null) {
-							System.out.println(cdsFinalIdentifiers + " | score: " + cdsMod.getScore());
-							cds.cdsIncreasePositionCount(utrMod);
+						if(cdsMod.getScore() > 0) {
+							System.out.println("cds > " + cdsFinalIdentifiers + " | score: " + cdsMod.getScore());
+							cds.cdsIncreasePositionCount(cdsMod);
 						}
 					}
 					/* normalize positions */
@@ -191,7 +191,7 @@ public class AssessPositionConservationByBasePair {
 
 						if(score > 4) { // positive score
 							if(!pos2[0].isEmpty()) {
-								if(Integer.parseInt(pos2[0]) < 100) { // ignore models in the CDS
+								if(Integer.parseInt(pos2[0]) < 100 && Integer.parseInt(pos2[pos2.length-1]) < 100) { // ignore models in the CDS
 
 									if(score > maxScore) {
 										mod = new Module(100, score, pos2, false);
