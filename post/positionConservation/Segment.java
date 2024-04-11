@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class Segment {
 
@@ -24,15 +25,18 @@ public class Segment {
 		int halfLengthFloor = (int) Math.floor(mod.getSeqLength() / (double) 2);
 
 		int[] positions = mod.getPositions();
+		System.out.println("pos: " + Arrays.toString(mod.getPositions()) + " | hlC= " + halfLengthCeil + " | hlF= " + halfLengthFloor);
 
 		for(int p=0; p<positions.length; p++) {
 
 			int currentPosition = positions[p];
 
-			if(currentPosition < halfLengthCeil) {
-				this.motifPositions[currentPosition]++;
-			} else {
-				this.motifPositions[motifPositions.length - (mod.getSeqLength() - currentPosition)]++;
+			if((p==0 && currentPosition==0) || currentPosition != 0) {
+				if(currentPosition < halfLengthCeil) {
+					this.motifPositions[currentPosition]++;
+				} else {
+					this.motifPositions[motifPositions.length - (mod.getSeqLength() - currentPosition)]++;
+				}
 			}
 		}
 
@@ -48,12 +52,16 @@ public class Segment {
 	public void cdsIncreasePositionCount(Module mod) {
 
 		/* increase position count */
+
+		System.out.println("pos: " + Arrays.toString(mod.getPositions()) + " | l= " + mod.getSeqLength());
 		int[] positions = mod.getPositions();
 	
 		for(int p=0; p<positions.length; p++) {
-			this.motifPositions[positions[p]]++;
+			if((p==0 && positions[p]== 0) || positions[p] != 0) {
+				this.motifPositions[positions[p]]++;
+			}
 		}
-		
+
 		/* adjust considered sequences (note : always 100 for CDS) */
 		for(int i=0; i< mod.getSeqLength(); i++) {
 			this.consideredSequence[i]++;
@@ -66,14 +74,14 @@ public class Segment {
 			this.normalizedPositions[i] = this.motifPositions[i] / (double) this.consideredSequence[i];
 		}
 	}
-	
+
 	public void printMotifPosition(String outputFile) {
 
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(new File(outputFile)));
 
 			for(int i=0; i<this.normalizedPositions.length; i++) {
-				out.write((i+1) + "\t" + this.motifPositions[i] + "\t" + this.normalizedPositions[i] + "\n");
+				out.write((i+1) + "\t" + this.motifPositions[i] + "\t" + this.consideredSequence[i] + "\t" + this.normalizedPositions[i] + "\n");
 				out.flush();
 			}
 			out.close();
