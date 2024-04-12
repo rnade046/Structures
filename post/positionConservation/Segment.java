@@ -31,11 +31,14 @@ public class Segment {
 
 			int currentPosition = positions[p];
 
-			if((p==0 && currentPosition==0) || currentPosition != 0) {
-				if(currentPosition < halfLengthCeil) {
-					this.motifPositions[currentPosition]++;
-				} else {
-					this.motifPositions[motifPositions.length - (mod.getSeqLength() - currentPosition)]++;
+			if(currentPosition > 0) { // ignore negative positions
+
+				if((p==0 && currentPosition==0) || currentPosition != 0) {
+					if(currentPosition < halfLengthCeil) {
+						this.motifPositions[currentPosition]++;
+					} else {
+						this.motifPositions[motifPositions.length - (mod.getSeqLength() - currentPosition)]++;
+					}
 				}
 			}
 		}
@@ -55,7 +58,7 @@ public class Segment {
 
 		System.out.println("pos: " + Arrays.toString(mod.getPositions()) + " | l= " + mod.getSeqLength());
 		int[] positions = mod.getPositions();
-	
+
 		for(int p=0; p<positions.length; p++) {
 			if((p==0 && positions[p]== 0) || positions[p] != 0) {
 				this.motifPositions[positions[p]]++;
