@@ -40,7 +40,9 @@ public class IndexJSONFromFasta {
 				String refSeq = line.split(">")[1];
 				String jsonPrefix = jsonPrefixFile + id + ".json"; // format JSON file name 
 
-				out.write(refSeq + "\t" + jsonPrefix + "\t");
+				line = in.readLine();
+				
+				out.write(refSeq + "\t" + jsonPrefix + "\t" + line.length() + "\n");
 				out.flush();
 
 				in.close();
