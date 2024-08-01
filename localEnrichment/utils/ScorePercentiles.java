@@ -50,7 +50,7 @@ public class ScorePercentiles {
 
 						/* determine percentile */
 						double percentile = determineScorePercentile(Double.parseDouble(info[1]), percentileBounds);
-						if(percentile == 0 ) {
+						if(percentile == 0) {
 							System.out.println(info[0] + "_" + info[1] + " _" + percentile);
 						}
 						
@@ -110,10 +110,10 @@ public class ScorePercentiles {
 
 		HashMap<Double, HashSet<Double>> percentiles = new HashMap<>();
 
-		for(int i=1; i<scores.size(); i++) {
+		for(int i=0; i<scores.size(); i++) {
 
 			//  ceiling; to prevent 0 probabilities
-			double p = Math.ceil(((i-1) / (double) scores.size()) * 100.00);
+			double p = Math.ceil(((i+1) / (double) scores.size()) * 100.00);
 			//			System.out.println(i + "|" + p + "|" + ((i-1)/ (double) scores.size()));
 			if(percentiles.containsKey(p)) { 
 				percentiles.get(p).add(scores.get(i));
@@ -128,7 +128,7 @@ public class ScorePercentiles {
 
 	public static double determineScorePercentile(double score, HashMap<Double, Double[]> percentiles)   {
 
-		double percentile = 0.0;
+		double percentile = 1.0;
 
 		for(Entry<Double, Double[]> e: percentiles.entrySet()) {
 
