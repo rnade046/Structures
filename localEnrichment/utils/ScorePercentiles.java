@@ -51,10 +51,8 @@ public class ScorePercentiles {
 
 					for(String p : prots) {
 
-						if(proteinSet.contains(p)) {
-
-							String[] info = p.split("\\_"); // [0] = gene_name, [1] = score
-
+						String[] info = p.split("\\_"); // [0] = gene_name, [1] = score
+						if(proteinSet.contains(info[0])) {
 							/* determine percentile */
 							double percentile = determineScorePercentile(Double.parseDouble(info[1]), percentileBounds);
 							if(percentile == 0) {
