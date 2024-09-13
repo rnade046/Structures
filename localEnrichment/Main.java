@@ -124,7 +124,7 @@ public class Main {
 			f = new File(percentileAnnotationFile);
 			
 			if(!f.exists() && !f.isDirectory()) {
-				ScorePercentiles.assignScorePercentile(annotationFile, percentilesFile, percentileAnnotationFile, threshold);
+				ScorePercentiles.assignScorePercentile(annotationFile, percentilesFile, percentileAnnotationFile, threshold, proteinSet);
 			}
 			annotationFile = percentileAnnotationFile;
 		}

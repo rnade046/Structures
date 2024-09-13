@@ -16,7 +16,7 @@ import java.util.Map.Entry;
 
 public class ScorePercentiles {
 
-	public static void assignScorePercentile(String annotationFile, String percentileFile, String updatedAnnotationFile, double rescaleThreshold) {
+	public static void assignScorePercentile(String annotationFile, String percentileFile, String updatedAnnotationFile, double rescaleThreshold, HashSet<String> proteinSet) {
 
 		/* load percentiles from file; where i = percentile, j(1) >= score, j(2) <= score */
 		List<Double> scores = loadScoresByPercentileThreshold(percentileFile, rescaleThreshold);
@@ -40,23 +40,31 @@ public class ScorePercentiles {
 			while(line!=null) {
 
 				String[] col = line.split("\t"); // [0] = module, [1] = #proteins, [2]=list proteins(prot1_score1|..|)
+
 				if(col.length > 2) {
-					out.write(col[0] + "\t" + col[1] + "\t");
+					out.write(col[0] + "\t");
+
+					String annotatedProteins = "";
+					int proteinCount = 0;
 
 					String[] prots=col[2].split("\\|");
+
 					for(String p : prots) {
 
-						String[] info = p.split("\\_"); // [0] = gene_name, [1] = score
+						if(proteinSet.contains(p)) {
 
-						/* determine percentile */
-						double percentile = determineScorePercentile(Double.parseDouble(info[1]), percentileBounds);
-						if(percentile == 0) {
-							System.out.println(info[0] + "_" + info[1] + " _" + percentile);
+							String[] info = p.split("\\_"); // [0] = gene_name, [1] = score
+
+							/* determine percentile */
+							double percentile = determineScorePercentile(Double.parseDouble(info[1]), percentileBounds);
+							if(percentile == 0) {
+								System.out.println(info[0] + "_" + info[1] + " _" + percentile);
+							}
+							annotatedProteins += info[0] + "_" + (percentile/100) + "|";
+							proteinCount++;
 						}
-						
-						out.write(info[0] + "_" + (percentile/100) + "|");
 					}
-					out.write("\n");
+					out.write(proteinCount + "\t" + annotatedProteins + "\n");
 					out.flush();
 				}
 				line = in.readLine();
@@ -133,7 +141,7 @@ public class ScorePercentiles {
 		for(Entry<Double, Double[]> e: percentiles.entrySet()) {
 
 			Double[] bounds = e.getValue();
-			
+
 			if(score >= bounds[0] && score <= bounds[1]) {
 				percentile = e.getKey();
 				break;
