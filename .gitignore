@@ -14,3 +14,4 @@ fdr/MainFDR.java
 bin/
 
 *.iml
+/bin
