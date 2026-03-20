@@ -12,15 +12,15 @@ public class combineHypergeometricTestOutput {
 
 	public static void main(String[] args) {
 
-		String inputPrefix = "/Users/rnadeau2/Documents/Structures/benchmark/module-0/moduleInfo_output_clustSize3_module";
-		String combinedDataFile = "/Users/rnadeau2/Documents/Structures/benchmark/corrNet2-400_benchmark_structures_score0_clustSize3.tsv";
+		String inputPrefix = "/Users/rnadeau2/Documents/Structures/benchmark/i4/moduleInfo_output_clustSize3_module";
+		String combinedDataFile = "/Users/rnadeau2/Documents/Structures/benchmark/output/corrNet2-400_benchmark_structures_score4_clustSize3_i4.tsv";
 
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(new File(combinedDataFile)));
 			
 			/* header */
 			out.write("Module\t");
-			for(int i=1; i<=107; i++) {
+			for(int i=1; i<=221; i++) {
 				out.write("c" + i + "\t");
 			}
 			out.write("\n");
@@ -39,12 +39,14 @@ public class combineHypergeometricTestOutput {
 				}
 				
 				/* print values */
-				out.write("m" + i + "\t");
-				for(int j=0; j<pvals.size(); j++) {
-					out.write(pvals.get(j) + "\t");
+				if(!pvals.isEmpty()) {
+					out.write("m" + i + "\t");
+					for(int j=0; j<pvals.size(); j++) {
+						out.write(pvals.get(j) + "\t");
+					}
+					out.write("\n");
+					out.flush();	
 				}
-				out.write("\n");
-				out.flush();
 			}
 
 			out.close();
@@ -65,12 +67,7 @@ public class combineHypergeometricTestOutput {
 
 			while(line != null) {
 				double pval = Double.parseDouble(line.split("\t")[7]);
-
-				if(pval < 0.05) { 		// significant p-values
-					pvalues.add(pval);
-				} else { 				// default
-					pvalues.add(0.0);
-				}
+				pvalues.add(pval);
 
 				line = in.readLine();
 			}

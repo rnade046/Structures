@@ -33,14 +33,21 @@ public class MainFDR {
 		//		case 2: clusteringName = "_coreTPD_p" + percentThreshold;
 		//		break;
 		//		}
-		//		
-		String motifs_significanceScoresFile = wd + "fdr/bp4_2/" + projectName + "_tpd_fwd_bp4_structure_significantScores.tsv";
-		String nullModel_significanceScoresFile = wd + "fdr/bp4_2/" + projectName  + "_tpd_rand1_bp4_2_struct_significantScores.tsv";
+//			
+//	
+//		String motifs_significanceScoresFile = wd + "fdr/bp0/nwTPD2_s1/corrNet2-400_nwTPD2_fwd_struct_bp0_significantScores.tsv";
+//		String nullModel_significanceScoresFile = wd + "fdr/bp0/nwTPD2_s1/corrNet2-400_nwTPD2_rand1_struct_bp0_significantScores.tsv";
 
+//		String motifs_significanceScoresFile = "/Users/rnadeau2/Documents/Structures/enrichmentAnalysis/fdr/upsampling/tpd/corrNet2-400_tpd_fwd_bp4_significantScores.tsv";
+		String motifs_significanceScoresFile = args[3];
+
+		String nullModel_significanceScoresFile = args[1];
+		
 		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-		String fdrOutput = wd + "fdr/bp4_2/" + sdf1.format(timestamp) + "_" + projectName + "_FDRatThresholds_monotonicTransformation.tsv";
-		//String significantMotifs = wd + pro
+//		String fdrOutput = wd + "fdr/bp0/nwTPD2_s1/" + sdf1.format(timestamp) + "_" + projectName + "_FDRatThresholds_monotonicTransformation_nwTPD2_bp0.tsv";
+		String fdrOutput = args[2];
+
 
 		/* Get list of significance scores */
 
