@@ -37,7 +37,7 @@ public class FunctionalEnrichment {
 		String motifFamilyInfoFile = "corrNetTop2-400_clusteringDetails.tsv";
 
 		System.out.println("**Loading representative motifs**");
-		HashSet<String> motifSet = loadSignificantMotifs(motifFamilyInfoFile, Double.parseDouble(args[1]));
+		HashSet<String> motifSet = loadSignificantMotifs(motifFamilyInfoFile);
 		System.out.println("Loaded motifs: " + motifSet.size());
 
 
@@ -125,7 +125,7 @@ public class FunctionalEnrichment {
 	 * @param motifFamilyFile	String - file containing all the representative motifs
 	 * @return motifSet			Set<String> - set of representative motifs
 	 */
-	private static HashSet<String> loadSignificantMotifs(String motifFamilyFile, double threshold){
+	private static HashSet<String> loadSignificantMotifs(String motifFamilyFile){
 
 		HashSet<String> motifSet = new HashSet<>();
 		try {
@@ -137,9 +137,7 @@ public class FunctionalEnrichment {
 			line = input.readLine();
 
 			while(line!=null) {
-				if(Double.parseDouble(line.split("\t")[3]) <= threshold) {
-					motifSet.add(line.split("\t")[0]); // [0] = module number
-				}
+				motifSet.add(line.split("\t")[0]); // [0] = module number
 				line = input.readLine();
 			}
 			input.close();
@@ -222,7 +220,7 @@ public class FunctionalEnrichment {
 
 				while(line!=null) {
 					String[] col = line.split("\t"); // [0] = GO-term; [10] = adjusted p-val
-					if(Double.parseDouble(col[10]) < 0.05) {
+					if(Double.parseDouble(col[10]) < 0.1) {
 						goMap.put(col[0], col[10]);
 					}
 
