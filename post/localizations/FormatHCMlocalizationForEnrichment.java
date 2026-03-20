@@ -19,14 +19,15 @@ public class FormatHCMlocalizationForEnrichment {
 		
 		String wd = "/Users/rnadeau2/Documents/Structures/";
 		
-		String proteinsInNetworkFile = wd + "enrichmentAnalysis/ioFiles/corrNetTop2-400_proteinsInNetwork_info.tsv";
-		String preyFile = wd + "nwTPD/localization/preys-latest.txt"; 
+		//String proteinsInNetworkFile = wd + "enrichmentAnalysis/ioFiles/corrNetTop2-400_proteinsInNetwork_info.tsv";
+		String proteinsInNetworkFile = wd + "post/nwTPD2/localization/corrNetTop2-400_background_annotatedProteins.txt";
+		String preyFile = wd + "post/nwTPD/localization/preys-latest.txt"; 
 		String annotationFile = wd + "enrichmentAnalysis/inputFiles/corrNetTop2-400_structureModules_fwd_4.0.tsv";
-		String outputFile = wd + "nwTPD/localization/SAFE/safeEnrichmentInput_motif";
-		String outputNMFFile = wd + "nwTPD/localization/NMF/nmfEnrichmentInput_motif";
+		String outputFile = wd + "post/nwTPD2/localization/SAFE/safeEnrichmentInput_motif";
+		String outputNMFFile = wd + "post/nwTPD2/localization/NMF/nmfEnrichmentInput_motif";
 		
-		double threshold = 0.000902548470845385;
-		String clusteringInfoFile = wd + "enrichmentAnalysis/fdr/bp4/corrNetTop2-400_nwTPD_fwd_bp4_structure_clusteringDetails.tsv";
+		double threshold = 0.00112423932452169;
+		String clusteringInfoFile = wd + "enrichmentAnalysis/fdr/bp4_rescaling/corrNetTop2-400_nwTPD2_fwd_struct_bp4_r0.85_clusteringDetails.tsv";
 		formatLocalizations(proteinsInNetworkFile, preyFile, clusteringInfoFile, threshold, annotationFile, outputFile, outputNMFFile);
 		
 	}
