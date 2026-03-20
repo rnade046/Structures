@@ -3,4 +3,8 @@
 *.class
 bin/
 *.iml
-*.DS_Store
+.DS_Store
+.project
+.gitattributes
+.classpath
+.settings
