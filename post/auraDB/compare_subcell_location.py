@@ -29,12 +29,12 @@ def parse_locations(row):
     }
 
 def load_factors(trans_file):
-    fields = ['Regulatory factor', 'Target Gene']
-    factors = pd.read_csv(trans_file, sep="\t", usecols=fields).drop_duplicates()
+    #fields = ['Regulatory factor', 'Target Gene']
+    factors = pd.read_csv(trans_file, sep="\t").drop_duplicates()
     return factors
 
 
-def assess_shared_locations(factors, atlas, out_file):
+def assess_shared_locations(factors, atlas, out_file, summary_out_file):
     location_map = atlas.set_index("Gene name")["all_locations"]
     out = factors.copy()
     out["rf_locations"] = out["Regulatory factor"].map(location_map)
@@ -42,6 +42,13 @@ def assess_shared_locations(factors, atlas, out_file):
 
     out["matching_locations"] = out.apply(get_overlap, axis=1)
     out.to_csv(out_file, sep="\t", index=False)
+
+    out["co_localized"] = out["matching_locations"].notna()
+
+    cols_to_keep = ["chr", "motif_start", "motif_end", "Regulatory factor", "Target Gene",
+                    "Target_UTR_ids", "binding_start", "binding_end", "co_localized"]
+
+    out[cols_to_keep].to_csv(summary_out_file, sep="\t", index=False)
 
 
 def get_overlap(row):
@@ -58,9 +65,10 @@ if __name__ == '__main__':
 
     for m in [82, 85, 94, 239]:
         motif = f"{wd}/output/trans_motif{m}.tsv"
-        out_file = f"{wd}/protein_atlas/atlas_subcell_location_auradb_transfactors_motif{m}.tsv"
+        matched_location_file = f"{wd}/protein_atlas/atlas_subcell_location_auradb_transfactors_motif{m}.tsv"
+        summary_file = f"{wd}/output_summary/auradb_transfactors_location_motif{m}.tsv"
 
         trans = load_factors(motif)
         atlas = load_atlas(atlas_file, trans)
-        assess_shared_locations(trans, atlas, out_file)
+        assess_shared_locations(trans, atlas, matched_location_file, summary_file)
 
