@@ -4,23 +4,36 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashSet;
+import java.util.Properties;
 
 public class FormatSequencesForRNAfold {
 
 
-	public static void main(String[] args) { 
-
-		// files
-		String utrSequencesFile = "/Users/rnadeau2/Documents/Structures/hcm/hg38_3utr_sequence.fasta.txt";
-		String cdsSequencesFile = "/Users/rnadeau2/Documents/Structures/hcm/hg38_cds_sequence.fasta.txt";
-
-		String genesInNetworkFile = "/Users/rnadeau2/Documents/Structures/hcm/MappingRefSeqIdsToGeneSymbol_corrNet2-400.tsv";
+	public static void main(String[] args) throws FileNotFoundException, IOException { 
 		
-		String formatedSequencesFile = "/Users/rnadeau2/Documents/Structures/hcm/fasta/corrNet2-400_3utr_w100cds_";
+		Properties params = new Properties();
+		params.load(new FileInputStream(args[0]));	
+		
+		String wd = params.getProperty("working_directory");
+		
+		// files
+		String utrSequencesFile =  wd + params.getProperty("utrSeqFile");
+		String cdsSequencesFile =  wd + params.getProperty("codingSeqFile");
+
+		String genesInNetworkFile =  wd + params.getProperty("proteinInfoMappingFile");
+		
+		String formatedSequencesFile = wd + "fasta/sequence_";
+		
+		// create FASTA directory
+		File fastaDir = new File(wd + "fasta/");
+		if(!fastaDir.exists()) {
+			fastaDir.mkdirs();
+		}
 
 		// load refSeqIds associated to proteins in network
 		HashSet<String> idSet = loadIds(genesInNetworkFile);
