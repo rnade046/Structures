@@ -27,7 +27,7 @@ public class FormatSequencesForRNAfold {
 
 		String genesInNetworkFile =  wd + params.getProperty("proteinInfoMappingFile");
 		
-		String formatedSequencesFile = wd + "fasta/sequence_";
+		String formatedSequencesFile = wd + "fasta/100cds_3utr.fasta";
 		
 		// create FASTA directory
 		File fastaDir = new File(wd + "fasta/");
