@@ -15,7 +15,7 @@ LESuMoN is a tool for RNA structural motif discovery in the context of protein c
 * [ViennaRNA package](https://www.tbi.univie.ac.at/RNA/)
 
 ## Input files
-Example input files are available in our [Zenodo repository](https://doi.org/10.5281/zenodo.19162062).
+Example input and output files are available in our [Zenodo repository](https://doi.org/10.5281/zenodo.19162062).
 
 #### 1. Sequences (e.g. `hg38_3utr.fasta` and `hg38_cds.fasta`)
 Two separate FASTA files are required: one for 3'UTR sequences and one for coding sequences. These files should contain sequences corresponding to proteins in the network. Additional sequences may be included, but they will be ignored if they are not associated with proteins in the input ID file.
@@ -59,7 +59,7 @@ All file paths below are specified relative to `working_directory` unless otherw
 | `numberOfSamplings` | `Integer` | Number of times to sample network for Monte Carlo Sampling. Recommended: `1000000` |
     
 # Pipeline
-![graphical representation of pipeline](pipeline-workflow.png)
+![graphical representation of pipeline](docs/pipeline-workflow.png)
 
 To execute the full pipeline, run LESuMoN once on the biological sequences and run LESuMoN_rand multiple times on randomized sequences. Fifteen null-model runs were used in our analyses.
 
